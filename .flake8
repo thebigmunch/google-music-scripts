@@ -1,0 +1,9 @@
+[flake8]
+ignore = W191
+max-line-length = 150
+import-order-style = tbm
+exclude =
+	conf.py
+enable-plugins =
+	builtins
+	import_order

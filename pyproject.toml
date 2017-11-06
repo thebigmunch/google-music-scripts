@@ -1,0 +1,46 @@
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "google-music-scripts"
+description = "A CLI utility for interacting with Google Music."
+version = "1.0.0"
+
+license = "MIT"
+
+authors = ["thebigmunch <mail@thebigmunch.me>"]
+
+readme = "README.md"
+
+repository = "https://github.com/thebigmunch/google-music-scripts"
+homepage = "https://github.com/thebigmunch/google-music-scripts"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+appdirs = "^1.4"
+click = "^6.0"
+click-default-group = "^1.2"
+logzero = "^1.5"
+
+flake8 = { version = "^3.5", optional = true }
+flake8-builtins = { version = "^1.0", optional = true }
+flake8-import-order = { version = "^0.18", optional = true }
+flake8-import-order-tbm = { version = "^1.0.0", optional = true }
+sphinx = { version = "^1.7", optional = true }
+sphinx-click = { version = "^1.0", optional = true }
+
+[tool.poetry.extras]
+dev = [ "flake8", "flake8-builtins", "flake8-import-order", "flake8-import-order-tbm", "sphinx", "sphinx-click" ]
+doc = [ "sphinx", "sphinx-click" ]
+lint = [ "flake8", "flake8-builtins", "flake8-import-order", "flake8-import-order-tbm" ]
+
+[tool.poetry.scripts]
+gms = "google_music_scripts.cli:gms"
+gmdelete = "google_music_scripts.cli:delete"
+gmdownload = "google_music_scripts.cli:download"
+gmquota = "google_music_scripts.cli:quota"
+gmsearch = "google_music_scripts.cli:search"
+gmsync = "google_music_scripts.cli:sync"
+gmupload = "google_music_scripts.cli:upload"
