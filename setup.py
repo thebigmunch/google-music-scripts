@@ -29,9 +29,13 @@ setup(
 
 	install_requires=[
 		'appdirs>=1.4',
+		'audio-metadata>=0.1',
 		'click>=6.0',
 		'click-default-group>=1.2',
-		'logzero>=1.5'
+		'google-music>=1.0',
+		'google-music-utils>=1.0',
+		'logzero>=1.5',
+		'sphinx-click>=1.0'
 	],
 
 	packages=find_packages('src'),
