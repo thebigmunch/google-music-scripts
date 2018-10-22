@@ -1,7 +1,8 @@
 # google-music-scripts
 
 [google-music-scripts](https://github.com/thebigmunch/google-music-scripts)
-is a CLI utility for interacting with Google Music.
+is a CLI utility for interacting with Google Music using my alternative to
+gmusicapi, [google-music](https://github.com/thebigmunch/google-music).
 
 ## Installation
 
