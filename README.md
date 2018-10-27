@@ -26,7 +26,7 @@ Get your own thanks inbox at [SayThanks.io](https://saythanks.io/).
 
 #### Contribute
 
-[Contribute](https://github.com/thebigmunch/google-music-scripts/blob/master/CONTRIBUTING.md) by submitting bug reports, feature requests, or code.
+[Contribute](https://github.com/thebigmunch/google-music-scripts/blob/master/.github/CONTRIBUTING.md) by submitting bug reports, feature requests, or code.
 
 #### Help Others/Stay Informed
 
