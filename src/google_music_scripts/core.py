@@ -23,7 +23,7 @@ def download_songs(mm, songs, template=None):
 		songnum += 1
 
 		try:
-			_, audio = mm.download(song)
+			audio, _ = mm.download(song)
 		except Exception as e:  # TODO: More specific exception.
 			logger.info(
 				f"({songnum:>{pad}}/{total}) Failed -- {song} | {e}",
