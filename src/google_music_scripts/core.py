@@ -33,7 +33,7 @@ def download_songs(mm, songs, template=None):
 			temp = tempfile.NamedTemporaryFile(suffix='.mp3', delete=False)
 			temp.write(audio)
 
-			tags = audio_metadata.load(temp.name)
+			tags = audio_metadata.load(temp.name).tags
 			filepath = gm_utils.template_to_filepath(template, tags) + '.mp3'
 			dirname = os.path.dirname(filepath)
 
