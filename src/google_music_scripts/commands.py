@@ -81,8 +81,6 @@ def do_download(
 
 				logger.debug(f"{title} -- {artist} -- {album} ({song_id})")
 	else:
-		logger.info(f"Downloading {len(to_download)} song(s) from Google Music")
-
 		download_songs(mm, to_download, template=output)
 
 	mm.logout()
