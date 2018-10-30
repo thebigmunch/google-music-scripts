@@ -7,3 +7,5 @@ exclude =
 enable-plugins =
 	builtins
 	import_order
+application-import-names =
+	google_music_scripts

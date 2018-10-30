@@ -53,7 +53,7 @@ def download_songs(mm, songs, template=None):
 			)
 
 
-def _filter_songs(songs, include_filters=None, exclude_filters=None, all_includes=False, all_excludes=False):
+def filter_songs(songs, include_filters=None, exclude_filters=None, all_includes=False, all_excludes=False):
 	if include_filters or exclude_filters:
 		logger.info("Filtering songs")
 
@@ -80,19 +80,6 @@ def _filter_songs(songs, include_filters=None, exclude_filters=None, all_include
 	return matched_songs
 
 
-def get_google_songs(mm, include_filters=None, all_includes=False, exclude_filters=None, all_excludes=False):
-	logger.info("Loading Google songs")
-
-	google_songs = mm.songs()
-
-	matched_songs = _filter_songs(
-		google_songs, include_filters=include_filters, all_includes=all_includes,
-		exclude_filters=exclude_filters, all_excludes=all_excludes
-	)
-
-	return matched_songs
-
-
 def get_local_songs(
 	filepaths, *, include_filters=None, all_includes=False,
 	exclude_filters=None, all_excludes=False, max_depth=float('inf')):
@@ -101,7 +88,7 @@ def get_local_songs(
 
 	local_songs = get_supported_filepaths(filepaths, max_depth=max_depth)
 
-	matched_songs = _filter_songs(
+	matched_songs = filter_songs(
 		local_songs, include_filters=include_filters, all_includes=all_includes,
 		exclude_filters=exclude_filters, all_excludes=all_excludes
 	)

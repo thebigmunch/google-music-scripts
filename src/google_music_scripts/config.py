@@ -35,7 +35,7 @@ def ensure_log_filepath():
 # TODO: For now, copying most of logzero's LogFormatter to hack in a different color
 #       for upload/download success without changing the log level.
 class ResultFormatter(logzero.LogFormatter):
-	def format(self, record):
+	def format(self, record):  # noqa
 		try:
 			message = record.getMessage()
 			assert isinstance(message, logzero.basestring_type)  # guaranteed by logging
