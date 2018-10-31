@@ -11,7 +11,8 @@ gmusicapi, [google-music](https://github.com/thebigmunch/google-music).
 
 ## Usage
 
-See the [docs](https://google-music-scripts.readthedocs.io) or run ``gms -h``.
+For the release version, see the [stable docs](https://google-music-scripts.readthedocs.io/en/stable/).  
+For the development version, see the [latest docs](https://google-music-scripts.readthedocs.io/en/latest/).
 
 
 ## Appreciation
