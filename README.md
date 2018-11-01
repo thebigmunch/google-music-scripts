@@ -1,5 +1,7 @@
 # google-music-scripts
 
+[![Read the Docs](https://img.shields.io/readthedocs/google-music-scripts.svg)](https://google-music-scripts.readthedocs.io)
+
 [google-music-scripts](https://github.com/thebigmunch/google-music-scripts)
 is a CLI utility for interacting with Google Music using my alternative to
 gmusicapi, [google-music](https://github.com/thebigmunch/google-music).
