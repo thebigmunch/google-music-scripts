@@ -8,6 +8,23 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/1.1.1...master)
 
+### Changed
+
+* Filtering is now done through one option ``-f, --filters`` with different syntax and semantics.
+	* ``+field[value]`` is the new syntax for an include filter condition.
+	* ``-field[value]`` is the new syntax for an exclude filter condition.
+	* Multiple filters can be set in one call. 
+	* Multiple conditions can be chained in one filter.
+	* Values can still be valid Python regex.
+	* Matching is still done case-insensitively.
+
+  E.g:
+	* ``gms download -f 'artist[Beck]+album[Guero]-title[E-Pro]'``
+	  would download all songs by Beck from the album Guero without E-Pro in the title.
+	* ``gms download -f 'artist[Beck]+album[Guero]-title[E-Pro]' -f 'artist[Daft Punk]'``
+	  would download all songs by Beck from the album Guero without E-Pro in the title
+	  as well as all songs by Daft Punk.
+
 
 
 ## [1.1.1](https://github.com/thebigmunch/google-music-scripts/releases/tag/1.1.1) (2018-11-13)

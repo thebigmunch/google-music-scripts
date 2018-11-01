@@ -5,10 +5,11 @@ import google_music
 from logzero import logger
 
 from google_music_scripts.__about__ import __title__, __version__
+from google_music_scripts.cli import CONTEXT_SETTINGS
 from google_music_scripts.config import configure_logging
 
 
-@click.command()
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.version_option(__version__, '-V', '--version', prog_name=__title__, message="%(prog)s %(version)s")
 @click.option('-l', '--log', is_flag=True, default=False, help="Log to file.")
 @click.option(

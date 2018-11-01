@@ -1,6 +1,7 @@
 """Command line interface of google-music-scripts."""
 
 import os
+import re
 from collections import defaultdict
 
 import click
@@ -16,6 +17,7 @@ CONTEXT_SETTINGS = dict(
 	help_option_names=['-h', '--help'],
 	max_content_width=200
 )
+FILTER_RE = re.compile(r'(([+-]+)?(.*?)\[(.*?)\])', re.I)
 PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'commands')
 
 
@@ -59,6 +61,18 @@ def default_to_cwd(ctx, param, value):
 		value = (os.getcwd(),)
 
 	return value
+
+
+def parse_filters(ctx, param, value):
+	filters = []
+	for filter_ in value:
+		conditions = FILTER_RE.findall(filter_)
+		if not conditions:
+			raise ValueError(f"'{filter_}' is not a valid filter.")
+
+		filters.append(conditions)
+
+	return filters
 
 
 # Callback to split filter strings into dict containing field:value_list items.

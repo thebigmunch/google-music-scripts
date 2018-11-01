@@ -1,6 +1,7 @@
 import os
 import shutil
 import tempfile
+from collections import defaultdict
 
 import audio_metadata
 import google_music_utils as gm_utils
@@ -53,45 +54,54 @@ def download_songs(mm, songs, template=None):
 			)
 
 
-def filter_songs(songs, include_filters=None, exclude_filters=None, all_includes=False, all_excludes=False):
-	if include_filters or exclude_filters:
+def filter_songs(songs, filters):
+	if filters:
 		logger.info("Filtering songs")
 
-	matched_songs = None
+		matched_songs = []
 
-	if include_filters:
-		if all_includes:
-			matched_songs = gm_utils.include_items(songs, any_all=all, ignore_case=True, **include_filters)
-		else:
-			matched_songs = gm_utils.include_items(songs, any_all=any, ignore_case=True, **include_filters)
+		for filter_ in filters:
+			include_filters = defaultdict(list)
+			exclude_filters = defaultdict(list)
 
-	if exclude_filters:
-		if all_excludes:
-			matched_songs = gm_utils.exclude_items(
-				matched_songs, any_all=all, ignore_case=True, **exclude_filters
+			for _, oper, field, value in filter_:
+				if oper in ['+', '']:
+					include_filters[field].append(value)
+				elif oper == '-':
+					exclude_filters[field].append(value)
+
+			matched = songs
+
+			# Use all if multiple conditions for inclusion.
+			i_use_all = (len(include_filters) > 1) or any(len(v) > 1 for v in include_filters.values())
+			i_any_all = all if i_use_all else any
+			matched = gm_utils.include_items(
+				matched, any_all=i_any_all, ignore_case=True, **include_filters
 			)
-		else:
-			matched_songs = gm_utils.exclude_items(
-				songs, any_all=any, ignore_case=True, **exclude_filters
+
+			# Use any if multiple conditions for exclusion.
+			e_use_all = not ((len(exclude_filters) > 1) or any(len(v) > 1 for v in exclude_filters.values()))
+			e_any_all = all if e_use_all else any
+			matched = gm_utils.exclude_items(
+				matched, any_all=e_any_all, ignore_case=True, **exclude_filters
 			)
 
-	matched_songs = list(matched_songs) if matched_songs else songs
+			for song in matched:
+				if song not in matched_songs:
+					matched_songs.append(song)
+	else:
+		matched_songs = songs
 
 	return matched_songs
 
 
 def get_local_songs(
-	filepaths, *, include_filters=None, all_includes=False,
-	exclude_filters=None, all_excludes=False, max_depth=float('inf')):
+	filepaths, *, filters=None, max_depth=float('inf')):
 
 	logger.info("Loading local songs")
 
 	local_songs = get_supported_filepaths(filepaths, max_depth=max_depth)
-
-	matched_songs = filter_songs(
-		local_songs, include_filters=include_filters, all_includes=all_includes,
-		exclude_filters=exclude_filters, all_excludes=all_excludes
-	)
+	matched_songs = filter_songs(local_songs, filters)
 
 	return matched_songs
 
