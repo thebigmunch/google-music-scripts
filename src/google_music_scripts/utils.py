@@ -1,6 +1,9 @@
 __all__ = [
-	'convert_cygwin_path', 'delete_file', 'get_supported_filepaths',
-	'template_to_base_path', 'walk_depth'
+	'convert_cygwin_path',
+	'delete_file',
+	'get_supported_filepaths',
+	'template_to_base_path',
+	'walk_depth'
 ]
 
 import os
@@ -27,7 +30,10 @@ def convert_cygwin_path(filepath):
 
 	try:
 		win_path = subprocess.run(
-			["cygpath", "-aw", filepath], check=True, stdout=subprocess.PIPE, universal_newlines=True
+			["cygpath", "-aw", filepath],
+			check=True,
+			stdout=subprocess.PIPE,
+			universal_newlines=True
 		).stdout.strip()
 	except (FileNotFoundError, subprocess.CalledProcessError):
 		logger.exception("Call to cygpath failed.")
@@ -66,11 +72,21 @@ def get_supported_filepaths(filepaths, max_depth=float('inf')):
 					filepath = os.path.join(root, file_)
 
 					with open(filepath, 'rb') as f:
-						if audio_metadata.determine_format(f.read(4), extension=os.path.splitext(filepath)[1]) is not None:
+						if (
+							audio_metadata.determine_format(
+								f.read(4), extension=os.path.splitext(filepath)[1]
+							)
+							is not None
+						):
 							supported_filepaths.append(filepath)
 		elif os.path.isfile(path):
 			with open(path, 'rb') as f:
-				if audio_metadata.determine_format(f.read(4), extension=os.path.splitext(path)[1]) is not None:
+				if (
+					audio_metadata.determine_format(
+						f.read(4), extension=os.path.splitext(path)[1]
+					)
+					is not None
+				):
 					supported_filepaths.append(path)
 
 	return supported_filepaths
@@ -82,7 +98,10 @@ def template_to_base_path(template, google_songs):
 	if template == os.getcwd() or template == '%suggested%':
 		base_path = os.getcwd()
 	else:
-		song_paths = [os.path.abspath(gm_utils.template_to_filepath(template, song)) for song in google_songs]
+		song_paths = [
+			os.path.abspath(gm_utils.template_to_filepath(template, song))
+			for song in google_songs
+		]
 		base_path = os.path.commonpath(song_paths)
 
 	return base_path

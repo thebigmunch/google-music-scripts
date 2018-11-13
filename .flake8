@@ -1,5 +1,5 @@
 [flake8]
-ignore = W191
+ignore = W191, W503
 max-line-length = 150
 import-order-style = tbm
 exclude =

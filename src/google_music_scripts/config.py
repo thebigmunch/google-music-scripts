@@ -81,13 +81,16 @@ class ResultFormatter(logzero.LogFormatter):
 			# all the newlines to turn into '\n'.
 			lines = [formatted.rstrip()]
 			lines.extend(
-				logzero._safe_unicode(ln) for ln in record.exc_text.split('\n'))
+				logzero._safe_unicode(ln) for ln in record.exc_text.split('\n')
+			)
 			formatted = '\n'.join(lines)
 		return formatted.replace("\n", "\n    ")
 
 
 def configure_logging(modifier=0, log_to_file=False):
-	stream_formatter = ResultFormatter(fmt=LOG_FORMAT, datefmt='%Y-%m-%d %H:%M:%S', colors=LOG_COLORS)
+	stream_formatter = ResultFormatter(
+		fmt=LOG_FORMAT, datefmt='%Y-%m-%d %H:%M:%S', colors=LOG_COLORS
+	)
 	logzero.setup_default_logger(formatter=stream_formatter)
 
 	verbosity = 3 + modifier
@@ -102,6 +105,10 @@ def configure_logging(modifier=0, log_to_file=False):
 
 	if log_to_file:
 		ensure_log_filepath()
-		log_file = os.path.join(LOG_FILEPATH, time.strftime('%Y-%m-%d_%H-%M-%S') + '.log')
-		file_formatter = logzero.LogFormatter(fmt=LOG_FILE_FORMAT, datefmt='%Y-%m-%d %H:%M:%S')
+		log_file = os.path.join(
+			LOG_FILEPATH, time.strftime('%Y-%m-%d_%H-%M-%S') + '.log'
+		)
+		file_formatter = logzero.LogFormatter(
+			fmt=LOG_FILE_FORMAT, datefmt='%Y-%m-%d %H:%M:%S'
+		)
 		logzero.logfile(log_file, formatter=file_formatter)

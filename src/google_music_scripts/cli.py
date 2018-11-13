@@ -11,7 +11,9 @@ from .constants import UNIX_PATH_RE
 from .utils import convert_cygwin_path
 
 CMD_ALIASES = {
-	'del': 'delete', 'down': 'download', 'up': 'upload'
+	'del': 'delete',
+	'down': 'download',
+	'up': 'upload'
 }
 CONTEXT_SETTINGS = dict(
 	help_option_names=['-h', '--help'],
@@ -87,7 +89,12 @@ def split_filter_strings(ctx, param, value):
 
 
 @click.group(cls=AliasedGroup, context_settings=CONTEXT_SETTINGS)
-@click.version_option(__version__, '-V', '--version', prog_name=__title__, message="%(prog)s %(version)s")
+@click.version_option(
+	__version__,
+	'-V', '--version',
+	prog_name=__title__,
+	message="%(prog)s %(version)s"
+)
 def gms():
 	"""A collection of scripts to interact with Google Music."""
 

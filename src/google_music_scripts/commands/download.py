@@ -12,29 +12,67 @@ from google_music_scripts.core import download_songs, filter_songs
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.version_option(__version__, '-V', '--version', prog_name=__title__, message="%(prog)s %(version)s")
-@click.option('-l', '--log', is_flag=True, default=False, help="Log to file.")
-@click.option('-v', '--verbose', count=True)
-@click.option('-q', '--quiet', count=True)
-@click.option('-n', '--dry-run', is_flag=True, default=False, help="Output list of songs that would be downloaded.")
+@click.version_option(
+	__version__,
+	'-V', '--version',
+	prog_name=__title__,
+	message="%(prog)s %(version)s"
+)
 @click.option(
-	'-u', '--username', metavar='USERNAME', default='',
+	'-l', '--log',
+	is_flag=True,
+	default=False,
+	help="Log to file."
+)
+@click.option(
+	'-v', '--verbose',
+	count=True
+)
+@click.option(
+	'-q', '--quiet',
+	count=True
+)
+@click.option(
+	'-n', '--dry-run',
+	is_flag=True,
+	default=False,
+	help="Output list of songs that would be downloaded."
+)
+@click.option(
+	'-u', '--username',
+	metavar='USERNAME',
+	default='',
 	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
 )
 @click.option(
-	'--uploader-id', metavar='ID',
+	'--uploader-id',
+	metavar='ID',
 	help="A unique id given as a MAC address (e.g. '00:11:22:33:AA:BB').\nThis should only be provided when the default does not work."
 )
 @click.option(
-	'-o', '--output', metavar='TEMPLATE_PATH', default=os.getcwd(), type=CustomPath(),
+	'-o', '--output',
+	metavar='TEMPLATE_PATH',
+	default=os.getcwd(),
+	type=CustomPath(),
 	help="Output file or directory name which can include template patterns."
 )
 @click.option(
-	'-f', '--filters', metavar='FILTER', multiple=True,
-	callback=parse_filters, help="Metadata filters."
+	'-f', '--filters',
+	metavar='FILTER',
+	multiple=True,
+	callback=parse_filters,
+	help="Metadata filters."
 )
 def download(
-	log, verbose, quiet, dry_run, username, uploader_id, output, filters):
+	log,
+	verbose,
+	quiet,
+	dry_run,
+	username,
+	uploader_id,
+	output,
+	filters
+):
 	"""Download songs from a Google Music library."""
 
 	configure_logging(verbose - quiet, log_to_file=log)
@@ -46,7 +84,13 @@ def download(
 		sys.exit("Failed to authenticate client.")
 
 	to_download = filter_songs(mm.songs(), filters)
-	to_download.sort(key=lambda song: (song.get('artist'), song.get('album'), song.get('track_number')))
+	to_download.sort(
+		key=lambda song: (
+			song.get('artist'),
+			song.get('album'),
+			song.get('track_number')
+		)
+	)
 
 	if not to_download:
 		logger.info("No songs to download")

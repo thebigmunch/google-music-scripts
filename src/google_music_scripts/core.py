@@ -73,14 +73,26 @@ def filter_songs(songs, filters):
 			matched = songs
 
 			# Use all if multiple conditions for inclusion.
-			i_use_all = (len(include_filters) > 1) or any(len(v) > 1 for v in include_filters.values())
+			i_use_all = (
+				(len(include_filters) > 1)
+				or any(
+					len(v) > 1
+					for v in include_filters.values()
+				)
+			)
 			i_any_all = all if i_use_all else any
 			matched = gm_utils.include_items(
 				matched, any_all=i_any_all, ignore_case=True, **include_filters
 			)
 
 			# Use any if multiple conditions for exclusion.
-			e_use_all = not ((len(exclude_filters) > 1) or any(len(v) > 1 for v in exclude_filters.values()))
+			e_use_all = not (
+				(len(exclude_filters) > 1)
+				or any(
+					len(v) > 1
+					for v in exclude_filters.values()
+				)
+			)
 			e_any_all = all if e_use_all else any
 			matched = gm_utils.exclude_items(
 				matched, any_all=e_any_all, ignore_case=True, **exclude_filters
@@ -95,9 +107,7 @@ def filter_songs(songs, filters):
 	return matched_songs
 
 
-def get_local_songs(
-	filepaths, *, filters=None, max_depth=float('inf')):
-
+def get_local_songs(filepaths, *, filters=None, max_depth=float('inf')):
 	logger.info("Loading local songs")
 
 	local_songs = get_supported_filepaths(filepaths, max_depth=max_depth)
@@ -107,8 +117,13 @@ def get_local_songs(
 
 
 def upload_songs(
-	mm, filepaths, include_album_art=True, transcode_lossless=True,
-	transcode_lossy=True, transcode_quality='320k', delete_on_success=False
+	mm,
+	filepaths,
+	include_album_art=True,
+	transcode_lossless=True,
+	transcode_lossy=True,
+	transcode_quality='320k',
+	delete_on_success=False
 ):
 	logger.info(f"Uploading {len(filepaths)} songs to Google Music")
 
@@ -149,4 +164,6 @@ def upload_songs(
 			try:
 				os.remove(result['filepath'])
 			except (OSError):
-				logger.warning(f"Failed to remove {result['filepath']} after successful upload")
+				logger.warning(
+					f"Failed to remove {result['filepath']} after successful upload"
+				)

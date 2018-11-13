@@ -11,23 +11,65 @@ from google_music_scripts.core import filter_songs
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.version_option(__version__, '-V', '--version', prog_name=__title__, message="%(prog)s %(version)s")
-@click.option('-l', '--log', is_flag=True, default=False, help="Log to file.")
-@click.option('-v', '--verbose', count=True)
-@click.option('-q', '--quiet', count=True)
-@click.option('-n', '--dry-run', is_flag=True, default=False, help="Output list of songs that would be deleted.")
+@click.version_option(
+	__version__,
+	'-V', '--version',
+	prog_name=__title__,
+	message="%(prog)s %(version)s"
+)
 @click.option(
-	'-u', '--username', metavar='USERNAME', default='',
+	'-l', '--log',
+	is_flag=True,
+	default=False,
+	help="Log to file.")
+@click.option(
+	'-v', '--verbose',
+	count=True
+)
+@click.option(
+	'-q', '--quiet',
+	count=True
+)
+@click.option(
+	'-n', '--dry-run',
+	is_flag=True,
+	default=False,
+	help="Output list of songs that would be deleted."
+)
+@click.option(
+	'-u', '--username',
+	metavar='USERNAME',
+	default='',
 	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
 )
-@click.option('--device-id', metavar='ID', help="A mobile device id.")
-@click.option('-y', '--yes', is_flag=True, default=False, help="Delete songs without asking for confirmation.")
 @click.option(
-	'-f', '--filters', metavar='FILTER', multiple=True,
-	callback=parse_filters, help="Metadata filters."
+	'--device-id',
+	metavar='ID',
+	help="A mobile device id."
+)
+@click.option(
+	'-y', '--yes',
+	is_flag=True,
+	default=False,
+	help="Delete songs without asking for confirmation."
+)
+@click.option(
+	'-f', '--filters',
+	metavar='FILTER',
+	multiple=True,
+	callback=parse_filters,
+	help="Metadata filters."
 )
 def delete(
-	log, verbose, quiet, dry_run, username, device_id, yes, filters):
+	log,
+	verbose,
+	quiet,
+	dry_run,
+	username,
+	device_id,
+	yes,
+	filters
+):
 	"""Delete songs from a Google Music library."""
 
 	configure_logging(verbose - quiet, log_to_file=log)
