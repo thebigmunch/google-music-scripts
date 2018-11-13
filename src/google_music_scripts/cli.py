@@ -12,6 +12,10 @@ from .utils import convert_cygwin_path
 CMD_ALIASES = {
 	'del': 'delete', 'down': 'download', 'up': 'upload'
 }
+CONTEXT_SETTINGS = dict(
+	help_option_names=['-h', '--help'],
+	max_content_width=200
+)
 PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'commands')
 
 
@@ -68,10 +72,7 @@ def split_filter_strings(ctx, param, value):
 	return filters
 
 
-CONTEXT_SETTINGS = dict(max_content_width=200, help_option_names=['-h', '--help'])
-
-
-@click.command(cls=AliasedGroup, context_settings=CONTEXT_SETTINGS)
+@click.group(cls=AliasedGroup, context_settings=CONTEXT_SETTINGS)
 @click.version_option(__version__, '-V', '--version', prog_name=__title__, message="%(prog)s %(version)s")
 def gms():
 	"""A collection of scripts to interact with Google Music."""

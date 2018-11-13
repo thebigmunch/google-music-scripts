@@ -37,7 +37,10 @@ from google_music_scripts.core import filter_songs
 	'-Fa', '--all-excludes', is_flag=True, default=False,
 	help="Songs must match all exclude filter criteria to be included."
 )
-@click.option('-y', '--yes', is_flag=True, default=False, help="Display results without asking for confirmation.")
+@click.option(
+	'-y', '--yes', is_flag=True, default=False,
+	help="Display results without asking for confirmation."
+)
 def search(
 	log, verbose, quiet, username, device_id, include_filter, all_includes, exclude_filter, all_excludes, yes):
 	"""Search a Google Music library for songs."""
