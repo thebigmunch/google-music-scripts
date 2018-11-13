@@ -6,8 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased](https://github.com/thebigmunch/google-music-scripts/tree/master)
 
-[Commits](https://github.com/thebigmunch/google-music-scripts/compare/1.0.1...master)
+[Commits](https://github.com/thebigmunch/google-music-scripts/compare/1.1.1...master)
 
+
+
+## [1.1.1](https://github.com/thebigmunch/google-music-scripts/releases/tag/1.1.1) (2018-11-13)
+
+[Commits](https://github.com/thebigmunch/google-music-scripts/compare/1.1.0...1.1.1)
+
+### Fixed
+
+* Update required google-music version.
 
 
 ## [1.1.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/1.1.0) (2018-11-13)
@@ -21,7 +30,6 @@ This project adheres to [Semantic Versioning](https://semver.org).
 ### Changed
 
 * Refactored package structure.
-
 
 
 ## [1.0.1](https://github.com/thebigmunch/google-music-scripts/releases/tag/1.0.1) (2018-10-28)

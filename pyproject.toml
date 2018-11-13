@@ -5,7 +5,7 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "google-music-scripts"
 description = "A CLI utility for interacting with Google Music."
-version = "1.1.0"
+version = "1.1.1"
 
 license = "MIT"
 

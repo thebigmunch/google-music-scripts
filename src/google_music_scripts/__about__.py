@@ -10,7 +10,7 @@ __title__ = 'google-music-scripts'
 __summary__ = 'A collection of scripts to interact with Google Music.'
 __url__ = 'https://github.com/thebigmunch/google-music-scripts'
 
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __version_info__ = tuple(int(i) for i in __version__.split('.') if i.isdigit())
 
 __author__ = 'thebigmunch'
