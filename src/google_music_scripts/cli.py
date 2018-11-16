@@ -2,7 +2,6 @@
 
 import os
 import re
-from collections import defaultdict
 
 import click
 
@@ -73,17 +72,6 @@ def parse_filters(ctx, param, value):
 			raise ValueError(f"'{filter_}' is not a valid filter.")
 
 		filters.append(conditions)
-
-	return filters
-
-
-# Callback to split filter strings into dict containing field:value_list items.
-def split_filter_strings(ctx, param, value):
-	filters = defaultdict(list)
-
-	for filt in value:
-		field, val = filt.split(':', 1)
-		filters[field].append(val)
 
 	return filters
 
