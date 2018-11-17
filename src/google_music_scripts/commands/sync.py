@@ -23,6 +23,11 @@ from google_music_scripts.core import (
 )
 from google_music_scripts.utils import template_to_base_path
 
+if 'sync' in CONTEXT_SETTINGS['default_map']:
+	CONTEXT_SETTINGS['default_map'].update(
+		CONTEXT_SETTINGS['default_map']['sync']
+	)
+
 
 @click.group(
 	cls=DefaultGroup,
@@ -36,13 +41,29 @@ from google_music_scripts.utils import template_to_base_path
 	prog_name=__title__,
 	message="%(prog)s %(version)s"
 )
-def sync():
+@click.pass_context
+def sync(ctx):
 	"""Sync songs to/from a Google Music library."""
 
+	if 'sync' in ctx.default_map:
+		if (
+			'up' in ctx.default_map['sync']
+			and ctx.invoked_subcommand == 'up'
+		):
+			CONTEXT_SETTINGS['default_map'].update(
+				CONTEXT_SETTINGS['default_map']['sync']['up']
+			)
+		elif (
+			'down' in ctx.default_map['sync']
+			and ctx.invoked_subcommand == 'down'
+		):
+			CONTEXT_SETTINGS['default_map'].update(
+				CONTEXT_SETTINGS['default_map']['sync']['down']
+			)
 	pass
 
 
-@sync.command('down')
+@sync.command(context_settings=CONTEXT_SETTINGS)
 @click.version_option(
 	__version__,
 	'-V', '--version',
@@ -107,7 +128,7 @@ def sync():
 	help="Metadata filters."
 )
 @click.argument('include-paths', nargs=-1, type=CustomPath(resolve_path=True))
-def sync_down(
+def down(
 	log,
 	verbose,
 	quiet,
@@ -181,7 +202,7 @@ def sync_down(
 	logger.info("All done!")
 
 
-@sync.command('up')
+@sync.command(context_settings=CONTEXT_SETTINGS)
 @click.version_option(
 	__version__,
 	'-V', '--version',
@@ -262,7 +283,7 @@ def sync_down(
 	type=CustomPath(resolve_path=True),
 	callback=default_to_cwd
 )
-def sync_up(
+def up(
 	log,
 	verbose,
 	quiet,

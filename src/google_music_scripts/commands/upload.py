@@ -15,6 +15,16 @@ from google_music_scripts.config import configure_logging
 from google_music_scripts.core import get_local_songs, upload_songs
 
 
+if 'upload' in CONTEXT_SETTINGS['default_map']:
+	CONTEXT_SETTINGS['default_map'].update(
+		CONTEXT_SETTINGS['default_map']['upload']
+	)
+elif 'up' in CONTEXT_SETTINGS['default_map']:
+	CONTEXT_SETTINGS['default_map'].update(
+		CONTEXT_SETTINGS['default_map']['up']
+	)
+
+
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.version_option(
 	__version__,

@@ -11,6 +11,16 @@ from google_music_scripts.config import configure_logging
 from google_music_scripts.core import download_songs, filter_songs
 
 
+if 'download' in CONTEXT_SETTINGS['default_map']:
+	CONTEXT_SETTINGS['default_map'].update(
+		CONTEXT_SETTINGS['default_map']['download']
+	)
+elif 'down' in CONTEXT_SETTINGS['default_map']:
+	CONTEXT_SETTINGS['default_map'].update(
+		CONTEXT_SETTINGS['default_map']['down']
+	)
+
+
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.version_option(
 	__version__,

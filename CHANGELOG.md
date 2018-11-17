@@ -11,6 +11,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 ### Added
 
 * Configuration file.
+* Ability to set option defaults in configuration file.
+
 ### Changed
 
 * Filtering is now done through one option ``-f, --filters`` with different syntax and semantics.

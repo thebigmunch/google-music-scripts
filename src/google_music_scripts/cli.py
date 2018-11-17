@@ -6,6 +6,7 @@ import re
 import click
 
 from . import __title__, __version__
+from .config import convert_default_keys, get_config
 from .constants import UNIX_PATH_RE
 from .utils import convert_cygwin_path
 
@@ -15,6 +16,7 @@ CMD_ALIASES = {
 	'up': 'upload'
 }
 CONTEXT_SETTINGS = dict(
+	default_map=convert_default_keys(get_config().get('defaults', {})),
 	help_option_names=['-h', '--help'],
 	max_content_width=200
 )

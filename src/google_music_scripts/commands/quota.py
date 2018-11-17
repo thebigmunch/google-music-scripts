@@ -9,6 +9,12 @@ from google_music_scripts.cli import CONTEXT_SETTINGS
 from google_music_scripts.config import configure_logging
 
 
+if 'upload' in CONTEXT_SETTINGS['default_map']:
+	CONTEXT_SETTINGS['default_map'].update(
+		CONTEXT_SETTINGS['default_map']['upload']
+	)
+
+
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.version_option(
 	__version__,
