@@ -8,6 +8,9 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/1.1.1...master)
 
+### Added
+
+* Configuration file.
 ### Changed
 
 * Filtering is now done through one option ``-f, --filters`` with different syntax and semantics.

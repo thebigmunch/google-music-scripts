@@ -4,8 +4,12 @@ import time
 
 import appdirs
 import logzero
+import toml
 
 from .__about__ import __author__, __title__
+
+CONFIG_DIR = appdirs.user_config_dir(__title__, __author__)
+CONFIG_FILE = os.path.join(CONFIG_DIR, 'google-music-scripts.toml')
 
 LOG_FILEPATH = os.path.join(appdirs.user_data_dir(__title__, __author__), 'logs')
 LOG_FORMAT = '%(color)s[%(asctime)s]%(end_color)s %(message)s'
@@ -22,6 +26,41 @@ VERBOSITY_LOG_LEVELS = {
 	3: logging.INFO,
 	4: logging.DEBUG
 }
+
+
+def convert_default_keys(item):
+	if isinstance(item, dict):
+		return {
+			k.replace('--', '').replace('-', '_'): convert_default_keys(v)
+			for k, v in item.items()
+		}
+	else:
+		return item
+
+
+def get_config():
+	config = read_config_file()
+
+	return config
+
+
+def read_config_file():
+	try:
+		with open(CONFIG_FILE) as conf:
+			config = toml.load(conf)
+	except FileNotFoundError:
+		config = {}
+
+	write_config_file(config)
+
+	return config
+
+
+def write_config_file(config):
+	os.makedirs(CONFIG_DIR, exist_ok=True)
+
+	with open(CONFIG_FILE, 'w') as conf:
+		toml.dump(config, conf)
 
 
 def ensure_log_filepath():
