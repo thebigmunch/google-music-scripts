@@ -44,6 +44,28 @@ Nested commands work the same::
 	uploader-id = "uploader-id2"
 
 
+Filtering
+---------
+
+A number of ``gms`` commands allow filtering results based on song metadata (``-f, --filters``).
+The syntax is as follows:
+
+	* ``+field[value]`` to include filter condition.
+	* ``-field[value]`` to exclude filter condition.
+	* Multiple filters can be set in one call: ``-f +field[value] -f +field2[value2]``
+	* Multiple conditions can be chained in one filter: ``+field[value]+field2[value2]-field3[value3]``.
+	* Values can be valid Python regex.
+	* Matching is done case-insensitively.
+	* For convenience, a single or first condition can leave off the ``+``, but not ``-``.
+
+E.g:
+	* ``gms download -f 'artist[Beck]+album[Guero]-title[E-Pro]'``
+	  would download all songs by Beck from the album Guero without E-Pro in the title.
+	* ``gms download -f 'artist[Beck]+album[Guero]-title[E-Pro]' -f 'artist[Daft Punk]'``
+	  would download all songs by Beck from the album Guero without E-Pro in the title
+	  as well as all songs by Daft Punk.
+
+
 Command-Line Interface
 ----------------------
 
