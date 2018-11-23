@@ -97,3 +97,13 @@ html_show_sourcelink = False
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = False
+
+html_sidebars = {
+	'**': [
+		'about.html',
+		'localtoc.html',
+		'relations.html',
+		'searchbox.html',
+		'donate.html',
+	]
+}
