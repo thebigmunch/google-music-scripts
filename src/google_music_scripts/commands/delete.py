@@ -117,13 +117,14 @@ def delete(
 			for song in to_delete:
 				song_num += 1
 
-				logger.debug(f"Deleting {title} -- {artist} -- {album} ({song_id})")
-				mc.song_delete(song)
-
 				title = song.get('title', "<empty>")
 				artist = song.get('artist', "<empty>")
 				album = song.get('album', "<empty>")
 				song_id = song['id']
+
+				logger.debug(f"Deleting {title} -- {artist} -- {album} ({song_id})")
+
+				mc.song_delete(song)
 
 				logger.info(f"Deleted {song_num:>{pad}}/{total}")
 		else:
