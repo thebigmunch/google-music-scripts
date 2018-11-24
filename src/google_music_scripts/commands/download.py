@@ -6,22 +6,12 @@ import google_music
 from logzero import logger
 
 from google_music_scripts.__about__ import __title__, __version__
-from google_music_scripts.cli import CONTEXT_SETTINGS, CustomPath, parse_filters
+from google_music_scripts.cli import CustomPath, parse_filters
 from google_music_scripts.config import configure_logging
 from google_music_scripts.core import download_songs, filter_songs
 
 
-if 'download' in CONTEXT_SETTINGS['default_map']:
-	CONTEXT_SETTINGS['default_map'].update(
-		CONTEXT_SETTINGS['default_map']['download']
-	)
-elif 'down' in CONTEXT_SETTINGS['default_map']:
-	CONTEXT_SETTINGS['default_map'].update(
-		CONTEXT_SETTINGS['default_map']['down']
-	)
-
-
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command()
 @click.version_option(
 	__version__,
 	'-V', '--version',
@@ -51,7 +41,6 @@ elif 'down' in CONTEXT_SETTINGS['default_map']:
 @click.option(
 	'-u', '--username',
 	metavar='USERNAME',
-	default='',
 	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
 )
 @click.option(
@@ -85,7 +74,7 @@ def download(
 ):
 	"""Download songs from a Google Music library."""
 
-	configure_logging(verbose - quiet, log_to_file=log)
+	configure_logging(verbose - quiet, username, log_to_file=log)
 
 	logger.info("Logging in to Google Music")
 	mm = google_music.musicmanager(username, uploader_id=uploader_id)

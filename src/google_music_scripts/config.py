@@ -9,9 +9,8 @@ import toml
 from .__about__ import __author__, __title__
 
 CONFIG_DIR = appdirs.user_config_dir(__title__, __author__)
-CONFIG_FILE = os.path.join(CONFIG_DIR, 'google-music-scripts.toml')
 
-LOG_FILEPATH = os.path.join(appdirs.user_data_dir(__title__, __author__), 'logs')
+LOG_BASE_PATH = os.path.join(appdirs.user_data_dir(__title__, __author__))
 LOG_FORMAT = '%(color)s[%(asctime)s]%(end_color)s %(message)s'
 LOG_FILE_FORMAT = '[%(asctime)s] %(message)s'
 
@@ -38,37 +37,42 @@ def convert_default_keys(item):
 		return item
 
 
-def get_config():
-	config = read_config_file()
+def get_config(*, username=None):
+	config = read_config_file(username)
 
 	return config
 
 
-def read_config_file():
+def read_config_file(username=None):
+	config_file = os.path.join(CONFIG_DIR, username or '', 'google-music-scripts.toml')
 	try:
-		with open(CONFIG_FILE) as conf:
+		with open(config_file) as conf:
 			config = toml.load(conf)
 	except FileNotFoundError:
 		config = {}
 
-	write_config_file(config)
+	write_config_file(config, username=username)
 
 	return config
 
 
-def write_config_file(config):
-	os.makedirs(CONFIG_DIR, exist_ok=True)
+def write_config_file(config, username=None):
+	os.makedirs(os.path.join(CONFIG_DIR, username or ''), exist_ok=True)
 
-	with open(CONFIG_FILE, 'w') as conf:
+	config_file = os.path.join(CONFIG_DIR, username or '', 'google-music-scripts.toml')
+	with open(config_file, 'w') as conf:
 		toml.dump(config, conf)
 
 
-def ensure_log_filepath():
+def ensure_log_dir(username=None):
+	log_dir = os.path.join(LOG_BASE_PATH, username or '', 'logs')
 	try:
-		os.makedirs(LOG_FILEPATH)
+		os.makedirs(log_dir)
 	except OSError:
-		if not os.path.isdir(LOG_FILEPATH):
+		if not os.path.isdir(log_dir):
 			raise
+
+	return log_dir
 
 
 # TODO: For now, copying most of logzero's LogFormatter to hack in a different color
@@ -126,7 +130,7 @@ class ResultFormatter(logzero.LogFormatter):
 		return formatted.replace("\n", "\n    ")
 
 
-def configure_logging(modifier=0, log_to_file=False):
+def configure_logging(modifier=0, username=None, *, log_to_file=False):
 	stream_formatter = ResultFormatter(
 		fmt=LOG_FORMAT, datefmt='%Y-%m-%d %H:%M:%S', colors=LOG_COLORS
 	)
@@ -143,9 +147,9 @@ def configure_logging(modifier=0, log_to_file=False):
 	logzero.loglevel(log_level)
 
 	if log_to_file:
-		ensure_log_filepath()
+		log_dir = ensure_log_dir(username=username)
 		log_file = os.path.join(
-			LOG_FILEPATH, time.strftime('%Y-%m-%d_%H-%M-%S') + '.log'
+			log_dir, time.strftime('%Y-%m-%d_%H-%M-%S') + '.log'
 		)
 		file_formatter = logzero.LogFormatter(
 			fmt=LOG_FILE_FORMAT, datefmt='%Y-%m-%d %H:%M:%S'

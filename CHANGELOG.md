@@ -30,6 +30,11 @@ This project adheres to [Semantic Versioning](https://semver.org).
 	  would download all songs by Beck from the album Guero without E-Pro in the title
 	  as well as all songs by Daft Punk.
 
+### Removed
+
+* Legacy command entry points (gmupload, gmdownload, etc).
+  Use the ``gms`` subcommands instead.
+
 
 
 ## [1.1.1](https://github.com/thebigmunch/google-music-scripts/releases/tag/1.1.1) (2018-11-13)

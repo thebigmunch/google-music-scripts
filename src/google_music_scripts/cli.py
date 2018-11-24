@@ -16,7 +16,6 @@ CMD_ALIASES = {
 	'up': 'upload'
 }
 CONTEXT_SETTINGS = dict(
-	default_map=convert_default_keys(get_config().get('defaults', {})),
 	help_option_names=['-h', '--help'],
 	max_content_width=200
 )
@@ -45,6 +44,65 @@ class AliasedGroup(click.Group):
 		rv.sort()
 
 		return rv
+
+	def make_context(self, *args, **kwargs):
+		ctx = super().make_context(
+			*args,
+			help_option_names=['-h', '--help'],
+			max_content_width=200,
+			**kwargs
+		)
+
+		username = ''
+		for i, arg in enumerate(ctx.args):
+			if arg in ('-u', '--username'):
+				username = ctx.args[i + 1]
+				break
+
+		defaults = convert_default_keys(
+			get_config(username=username).get('defaults', {})
+		)
+
+		if defaults:
+			global_defaults = {
+				k: v
+				for k, v in defaults.items()
+				if k not in self.list_commands(ctx)
+			}
+
+			default_map = {}
+			for command in self.list_commands(ctx):
+				if command == 'sync':
+					default_map['sync'] = {**global_defaults}
+					sync_defaults = {
+						k: v
+						for k, v in defaults.get('sync', {}).items()
+						if k not in ['down', 'up']
+					}
+					default_map['sync'].update(sync_defaults)
+
+					for subcommand in ['down', 'up']:
+						default_map['sync'][subcommand] = {**global_defaults}
+						default_map['sync'][subcommand].update(sync_defaults)
+						default_map['sync'][subcommand].update(
+							defaults.get('sync', {}).get(subcommand, {})
+						)
+				else:
+					default_map[command] = {**global_defaults}
+					default_map[command].update(
+						defaults.get(command, {})
+					)
+
+					for alias, cmd in CMD_ALIASES.items():
+						if command == cmd:
+							default_map[alias] = {**default_map[command]}
+							default_map[alias].update(
+								defaults.get(alias, {})
+							)
+
+			ctx.default_map = default_map
+
+		return ctx
 
 
 # I use Windows Python install from Cygwin.
@@ -78,7 +136,7 @@ def parse_filters(ctx, param, value):
 	return filters
 
 
-@click.group(cls=AliasedGroup, context_settings=CONTEXT_SETTINGS)
+@click.group(cls=AliasedGroup)
 @click.version_option(
 	__version__,
 	'-V', '--version',

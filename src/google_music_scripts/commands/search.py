@@ -5,18 +5,12 @@ import google_music
 from logzero import logger
 
 from google_music_scripts.__about__ import __title__, __version__
-from google_music_scripts.cli import CONTEXT_SETTINGS, parse_filters
+from google_music_scripts.cli import parse_filters
 from google_music_scripts.config import configure_logging
 from google_music_scripts.core import filter_songs
 
 
-if 'search' in CONTEXT_SETTINGS['default_map']:
-	CONTEXT_SETTINGS['default_map'].update(
-		CONTEXT_SETTINGS['default_map']['search']
-	)
-
-
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command()
 @click.version_option(
 	__version__,
 	'-V', '--version',
@@ -40,7 +34,6 @@ if 'search' in CONTEXT_SETTINGS['default_map']:
 @click.option(
 	'-u', '--username',
 	metavar='USERNAME',
-	default='',
 	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
 )
 @click.option(
@@ -72,7 +65,7 @@ def search(
 ):
 	"""Search a Google Music library for songs."""
 
-	configure_logging(verbose - quiet, log_to_file=log)
+	configure_logging(verbose - quiet, username, log_to_file=log)
 
 	logger.info("Logging in to Google Music")
 	mc = google_music.mobileclient(username, device_id=device_id)

@@ -9,7 +9,6 @@ from logzero import logger
 
 from google_music_scripts.__about__ import __title__, __version__
 from google_music_scripts.cli import (
-	CONTEXT_SETTINGS,
 	CustomPath,
 	default_to_cwd,
 	parse_filters
@@ -23,17 +22,11 @@ from google_music_scripts.core import (
 )
 from google_music_scripts.utils import template_to_base_path
 
-if 'sync' in CONTEXT_SETTINGS['default_map']:
-	CONTEXT_SETTINGS['default_map'].update(
-		CONTEXT_SETTINGS['default_map']['sync']
-	)
-
 
 @click.group(
 	cls=DefaultGroup,
 	default='up',
-	default_if_no_args=True,
-	context_settings=CONTEXT_SETTINGS
+	default_if_no_args=True
 )
 @click.version_option(
 	__version__,
@@ -41,29 +34,13 @@ if 'sync' in CONTEXT_SETTINGS['default_map']:
 	prog_name=__title__,
 	message="%(prog)s %(version)s"
 )
-@click.pass_context
-def sync(ctx):
+def sync():
 	"""Sync songs to/from a Google Music library."""
 
-	if 'sync' in ctx.default_map:
-		if (
-			'up' in ctx.default_map['sync']
-			and ctx.invoked_subcommand == 'up'
-		):
-			CONTEXT_SETTINGS['default_map'].update(
-				CONTEXT_SETTINGS['default_map']['sync']['up']
-			)
-		elif (
-			'down' in ctx.default_map['sync']
-			and ctx.invoked_subcommand == 'down'
-		):
-			CONTEXT_SETTINGS['default_map'].update(
-				CONTEXT_SETTINGS['default_map']['sync']['down']
-			)
 	pass
 
 
-@sync.command(context_settings=CONTEXT_SETTINGS)
+@sync.command('down')
 @click.version_option(
 	__version__,
 	'-V', '--version',
@@ -93,7 +70,6 @@ def sync(ctx):
 @click.option(
 	'-u', '--username',
 	metavar='USERNAME',
-	default='',
 	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
 )
 @click.option(
@@ -128,7 +104,7 @@ def sync(ctx):
 	help="Metadata filters."
 )
 @click.argument('include-paths', nargs=-1, type=CustomPath(resolve_path=True))
-def down(
+def sync_down(
 	log,
 	verbose,
 	quiet,
@@ -143,7 +119,7 @@ def down(
 ):
 	"""Sync songs from a Google Music library."""
 
-	configure_logging(verbose - quiet, log_to_file=log)
+	configure_logging(verbose - quiet, username, log_to_file=log)
 
 	logger.info("Logging in to Google Music")
 	mm = google_music.musicmanager(username, uploader_id=uploader_id)
@@ -202,7 +178,7 @@ def down(
 	logger.info("All done!")
 
 
-@sync.command(context_settings=CONTEXT_SETTINGS)
+@sync.command('up')
 @click.version_option(
 	__version__,
 	'-V', '--version',
@@ -232,7 +208,6 @@ def down(
 @click.option(
 	'-u', '--username',
 	metavar='USERNAME',
-	default='',
 	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
 )
 @click.option(
@@ -283,7 +258,7 @@ def down(
 	type=CustomPath(resolve_path=True),
 	callback=default_to_cwd
 )
-def up(
+def sync_up(
 	log,
 	verbose,
 	quiet,
@@ -300,7 +275,7 @@ def up(
 ):
 	"""Sync songs to a Google Music library."""
 
-	configure_logging(verbose - quiet, log_to_file=log)
+	configure_logging(verbose - quiet, username, log_to_file=log)
 
 	logger.info("Logging in to Google Music")
 	mm = google_music.musicmanager(username, uploader_id=uploader_id)

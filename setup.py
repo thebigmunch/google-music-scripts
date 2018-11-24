@@ -46,13 +46,7 @@ setup(
 
 	entry_points={
 		'console_scripts': [
-			'gms = google_music_scripts.cli:gms',
-			'gmdelete = google_music_scripts.commands.delete:delete',
-			'gmdownload = google_music_scripts.commands.download:download',
-			'gmquota = google_music_scripts.commands.quota:quota',
-			'gmsearch = google_music_scripts.commands.search:search',
-			'gmsync = google_music_scripts.commands.sync:sync',
-			'gmupload = google_music_scripts.commands.upload:upload'
+			'gms = google_music_scripts.cli:gms'
 		]
 	}
 )

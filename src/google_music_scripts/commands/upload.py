@@ -6,7 +6,6 @@ from logzero import logger
 
 from google_music_scripts.__about__ import __title__, __version__
 from google_music_scripts.cli import (
-	CONTEXT_SETTINGS,
 	CustomPath,
 	default_to_cwd,
 	parse_filters
@@ -15,17 +14,7 @@ from google_music_scripts.config import configure_logging
 from google_music_scripts.core import get_local_songs, upload_songs
 
 
-if 'upload' in CONTEXT_SETTINGS['default_map']:
-	CONTEXT_SETTINGS['default_map'].update(
-		CONTEXT_SETTINGS['default_map']['upload']
-	)
-elif 'up' in CONTEXT_SETTINGS['default_map']:
-	CONTEXT_SETTINGS['default_map'].update(
-		CONTEXT_SETTINGS['default_map']['up']
-	)
-
-
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command()
 @click.version_option(
 	__version__,
 	'-V', '--version',
@@ -55,7 +44,6 @@ elif 'up' in CONTEXT_SETTINGS['default_map']:
 @click.option(
 	'-u', '--username',
 	metavar='USERNAME',
-	default='',
 	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
 )
 @click.option(
@@ -123,7 +111,7 @@ def upload(
 ):
 	"""Upload songs to a Google Music library."""
 
-	configure_logging(verbose - quiet, log_to_file=log)
+	configure_logging(verbose - quiet, username, log_to_file=log)
 
 	logger.info("Logging in to Google Music")
 	mm = google_music.musicmanager(username, uploader_id=uploader_id)

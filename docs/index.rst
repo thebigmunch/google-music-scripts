@@ -1,6 +1,14 @@
 google-music-scripts
 ====================
 
+Legacy Commands
+---------------
+
+As of version **2.0.0**, google-music-scripts no longer installs the entry points
+for the legacy commands (``gmupload, gmdownload, etc.``). Use the ``gms`` command
+with subcommands instead.
+
+
 Configuration
 -------------
 
@@ -8,9 +16,10 @@ The configuration file uses the `TOML <https://github.com/toml-lang/toml>`_ form
 It is located in the `user config directory
 <https://github.com/ActiveState/appdirs#some-example-output>`_
 for your operating system with the app author being **thebigmunch** and app name being
-**google-music-scripts**.
+**google-music-scripts**. If the ``-u, --username`` option is given to a command, the
+configuration file from subdirectory **username** is used.
 
-google-music-scripts allows configuration of default option using the defaults table.
+google-music-scripts allows configuration of option defaults using the defaults table.
 Use option long names (e.g. device-id, uploader-id) as the key.
 Defaults can be set for all commands, specific commands, or both with
 command-specific defaults taking precedence.
