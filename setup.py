@@ -32,7 +32,7 @@ setup(
 		'audio-metadata>=0.2',
 		'click>=6.0',
 		'click-default-group>=1.2',
-		'google-music>=2.0',
+		'google-music>=2.1',
 		'google-music-utils>=1.1',
 		'logzero>=1.5',
 		'sphinx-click>=1.0',
