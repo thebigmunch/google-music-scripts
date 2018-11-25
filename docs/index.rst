@@ -75,6 +75,20 @@ E.g:
 	  as well as all songs by Daft Punk.
 
 
+Aliases
+-------
+
+Some commands have shorter aliases to limit the necessary typing in the terminal.
+
+========  =====
+Command   Alias
+========  =====
+delete    del
+download  down
+upload    up
+========  =====
+
+
 Command-Line Interface
 ----------------------
 
