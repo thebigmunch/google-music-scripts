@@ -6,7 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased](https://github.com/thebigmunch/google-music-scripts/tree/master)
 
-[Commits](https://github.com/thebigmunch/google-music-scripts/compare/1.1.1...master)
+[Commits](https://github.com/thebigmunch/google-music-scripts/compare/2.0.0...master)
+
+
+## [2.0.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/2.0.0) (2018-11-26)
+
+[Commits](https://github.com/thebigmunch/google-music-scripts/compare/1.1.1...2.0.0)
 
 ### Added
 
@@ -34,7 +39,6 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 * Legacy command entry points (gmupload, gmdownload, etc).
   Use the ``gms`` subcommands instead.
-
 
 
 ## [1.1.1](https://github.com/thebigmunch/google-music-scripts/releases/tag/1.1.1) (2018-11-13)
