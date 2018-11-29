@@ -8,6 +8,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/2.0.0...master)
 
+### Removed
+
+* Transcoding options from upload commands.
+  See [#9](https://github.com/thebigmunch/google-music-scripts/issues/9)
+  for explanation.
+
 
 ## [2.0.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/2.0.0) (2018-11-26)
 

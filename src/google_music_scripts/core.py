@@ -120,9 +120,6 @@ def upload_songs(
 	mm,
 	filepaths,
 	include_album_art=True,
-	transcode_lossless=True,
-	transcode_lossy=True,
-	transcode_quality='320k',
 	delete_on_success=False
 ):
 	logger.info(f"Uploading {len(filepaths)} songs to Google Music")
@@ -134,9 +131,7 @@ def upload_songs(
 	for song in filepaths:
 		filenum += 1
 
-		result = mm.upload(
-			song, transcode_lossless=transcode_lossless, transcode_lossy=transcode_lossy
-		)
+		result = mm.upload(song)
 
 		if result['reason'] == 'Uploaded':
 			logger.info(

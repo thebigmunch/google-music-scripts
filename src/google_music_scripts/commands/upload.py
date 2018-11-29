@@ -70,18 +70,6 @@ from google_music_scripts.core import get_local_songs, upload_songs
 	help="Delete successfully uploaded local files."
 )
 @click.option(
-	'--transcode-lossless/--no-transcode-lossless',
-	is_flag=True,
-	default=True,
-	help="Transcode lossless files to MP3 for upload."
-)
-@click.option(
-	'--transcode-lossy/--no-transcode-lossy',
-	is_flag=True,
-	default=True,
-	help="Transcode non-MP3 lossy files to MP3 for upload."
-)
-@click.option(
 	'-f', '--filters',
 	metavar='FILTER',
 	multiple=True,
@@ -104,8 +92,6 @@ def upload(
 	no_recursion,
 	max_depth,
 	delete_on_success,
-	transcode_lossless,
-	transcode_lossy,
 	filters,
 	input_paths
 ):
@@ -139,8 +125,6 @@ def upload(
 		upload_songs(
 			mm,
 			to_upload,
-			transcode_lossless=transcode_lossless,
-			transcode_lossy=transcode_lossy,
 			delete_on_success=delete_on_success
 		)
 
