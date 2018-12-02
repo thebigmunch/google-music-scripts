@@ -19,8 +19,7 @@ but with the following exceptions to keep in mind for coding/linting:
 
 * Tabs should be used for indentation of code.
 * Don't use line continuation that aligns with opening delimiter.
-* I set a high maximum line length in flake8 to avoid unnecessary warnings.
-  Use judgement based on readability/understandability, not an arbitrary number.
+* Readability and understandibility are more important than arbitrary rules.
 
 Some linter errors may need to be ignored to accommodate these differences.
 
