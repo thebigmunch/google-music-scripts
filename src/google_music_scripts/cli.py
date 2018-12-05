@@ -136,6 +136,23 @@ def parse_filters(ctx, param, value):
 	return filters
 
 
+def split_album_art_paths(ctx, param, value):
+	paths = value
+	if value:
+		paths = []
+
+		if not isinstance(value, list):
+			value = value.split(',')
+
+		for val in value:
+			if os.name == 'nt' and UNIX_PATH_RE.match(val.strip()):
+				paths.append(convert_cygwin_path(val.strip()))
+			else:
+				paths.append(val)
+
+	return paths
+
+
 @click.group(cls=AliasedGroup)
 @click.version_option(
 	__version__,

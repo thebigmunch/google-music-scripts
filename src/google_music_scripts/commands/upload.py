@@ -8,7 +8,8 @@ from google_music_scripts.__about__ import __title__, __version__
 from google_music_scripts.cli import (
 	CustomPath,
 	default_to_cwd,
-	parse_filters
+	parse_filters,
+	split_album_art_paths
 )
 from google_music_scripts.config import configure_logging
 from google_music_scripts.core import get_local_songs, upload_songs
@@ -76,6 +77,11 @@ from google_music_scripts.core import get_local_songs, upload_songs
 	callback=parse_filters,
 	help="Metadata filters."
 )
+@click.option(
+	'--album-art',
+	callback=split_album_art_paths,
+	help="Comma-separated list of album art filepaths.\nCan be relative filenames and/or absolute filepaths."
+)
 @click.argument(
 	'input-paths',
 	nargs=-1,
@@ -93,6 +99,7 @@ def upload(
 	max_depth,
 	delete_on_success,
 	filters,
+	album_art,
 	input_paths
 ):
 	"""Upload songs to a Google Music library."""
@@ -125,6 +132,7 @@ def upload(
 		upload_songs(
 			mm,
 			to_upload,
+			album_art=album_art,
 			delete_on_success=delete_on_success
 		)
 

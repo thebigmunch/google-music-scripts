@@ -1,6 +1,7 @@
 __all__ = [
 	'convert_cygwin_path',
 	'delete_file',
+	'get_album_art_path',
 	'get_supported_filepaths',
 	'template_to_base_path',
 	'walk_depth'
@@ -47,6 +48,27 @@ def delete_file(filepath):
 		os.remove(filepath)
 	except (OSError, PermissionError):
 		logger.warning(f"Failed to remove file: {filepath}.")
+
+
+def get_album_art_path(song, album_art_names):
+	album_art_path = None
+	if album_art_names:
+		dirname = os.path.dirname(song)
+
+		for name in album_art_names:
+			if (
+				os.path.isabs(name)
+				and os.path.isfile(name)
+			):
+				album_art_path = name
+				break
+			else:
+				path = os.path.join(dirname, name)
+				if os.path.isfile(path):
+					album_art_path = path
+					break
+
+	return album_art_path
 
 
 def get_supported_filepaths(filepaths, max_depth=float('inf')):

@@ -7,7 +7,7 @@ import audio_metadata
 import google_music_utils as gm_utils
 from logzero import logger
 
-from .utils import get_supported_filepaths
+from .utils import get_album_art_path, get_supported_filepaths
 
 
 def download_songs(mm, songs, template=None):
@@ -119,7 +119,7 @@ def get_local_songs(filepaths, *, filters=None, max_depth=float('inf')):
 def upload_songs(
 	mm,
 	filepaths,
-	include_album_art=True,
+	album_art=None,
 	delete_on_success=False
 ):
 	logger.info(f"Uploading {len(filepaths)} songs to Google Music")
@@ -131,7 +131,12 @@ def upload_songs(
 	for song in filepaths:
 		filenum += 1
 
-		result = mm.upload(song)
+		album_art_path = get_album_art_path(song, album_art)
+
+		result = mm.upload(
+			song,
+			album_art_path=album_art_path
+		)
 
 		if result['reason'] == 'Uploaded':
 			logger.info(

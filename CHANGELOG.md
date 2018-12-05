@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/2.0.0...master)
 
+### Added
+
+* Option to specify external album art names/paths with upload commands.
+
 ### Removed
 
 * Transcoding options from upload commands.
