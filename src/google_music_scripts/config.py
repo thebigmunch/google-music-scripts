@@ -30,7 +30,7 @@ VERBOSITY_LOG_LEVELS = {
 def convert_default_keys(item):
 	if isinstance(item, dict):
 		return {
-			k.replace('--', '').replace('-', '_'): convert_default_keys(v)
+			k.lstrip('-').replace('-', '_'): convert_default_keys(v)
 			for k, v in item.items()
 		}
 	else:
