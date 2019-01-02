@@ -18,6 +18,11 @@ This project adheres to [Semantic Versioning](https://semver.org).
   See [#9](https://github.com/thebigmunch/google-music-scripts/issues/9)
   for explanation.
 
+### Fixed
+
+* ``TypeError`` when sorting Google Music songs due to no defaults
+  being set for ``get`` calls in key.
+
 
 ## [2.0.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/2.0.0) (2018-11-26)
 

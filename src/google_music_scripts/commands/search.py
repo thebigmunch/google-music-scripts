@@ -76,9 +76,9 @@ def search(
 	search_results = filter_songs(mc.songs(), filters)
 	search_results.sort(
 		key=lambda song: (
-			song.get('artist'),
-			song.get('album'),
-			song.get('trackNumber')
+			song.get('artist', ''),
+			song.get('album', ''),
+			song.get('trackNumber', 0)
 		)
 	)
 

@@ -85,9 +85,9 @@ def download(
 	to_download = filter_songs(mm.songs(), filters)
 	to_download.sort(
 		key=lambda song: (
-			song.get('artist'),
-			song.get('album'),
-			song.get('track_number')
+			song.get('artist', ''),
+			song.get('album', ''),
+			song.get('track_number', 0)
 		)
 	)
 

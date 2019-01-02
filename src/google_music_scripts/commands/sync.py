@@ -153,9 +153,9 @@ def sync_down(
 	)
 	to_download.sort(
 		key=lambda song: (
-			song.get('artist'),
-			song.get('album'),
-			song.get('track_number')
+			song.get('artist', ''),
+			song.get('album', ''),
+			song.get('track_number', 0)
 		)
 	)
 
