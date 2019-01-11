@@ -4,7 +4,7 @@ import time
 
 import appdirs
 import logzero
-import toml
+from tomlkit.toml_file import TOMLFile
 
 from .__about__ import __author__, __title__
 
@@ -44,10 +44,9 @@ def get_config(*, username=None):
 
 
 def read_config_file(username=None):
-	config_file = os.path.join(CONFIG_DIR, username or '', 'google-music-scripts.toml')
+	config_file = TOMLFile(os.path.join(CONFIG_DIR, username or '', 'google-music-scripts.toml'))
 	try:
-		with open(config_file) as conf:
-			config = toml.load(conf)
+		config = config_file.read()
 	except FileNotFoundError:
 		config = {}
 
@@ -59,9 +58,8 @@ def read_config_file(username=None):
 def write_config_file(config, username=None):
 	os.makedirs(os.path.join(CONFIG_DIR, username or ''), exist_ok=True)
 
-	config_file = os.path.join(CONFIG_DIR, username or '', 'google-music-scripts.toml')
-	with open(config_file, 'w') as conf:
-		toml.dump(config, conf)
+	config_file = TOMLFile(os.path.join(CONFIG_DIR, username or '', 'google-music-scripts.toml'))
+	config_file.write(config)
 
 
 def ensure_log_dir(username=None):

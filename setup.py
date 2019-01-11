@@ -36,7 +36,7 @@ setup(
 		'google-music-utils>=1.1',
 		'logzero>=1.5',
 		'sphinx-click>=1.0',
-		'toml>=0.10'
+		'tomlkit>=0.5'
 	],
 
 	packages=find_packages('src'),
