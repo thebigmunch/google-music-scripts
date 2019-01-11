@@ -6,19 +6,6 @@
 is a CLI utility for interacting with Google Music using my alternative to
 gmusicapi, [google-music](https://github.com/thebigmunch/google-music).
 
-## Notice
-
-Installations prior to 2018-11-30 suffered from an upstream bug in
-``google-music-proto<=2.1.1`` that caused audible quality loss for
-transcoded files (non-MP3) when uploaded.
-
-Users should upgrade using ``pip install -U google-music-scripts`` or
-``pip install google-music-proto>=2.1.2`` to make sure you have
-``google-music-proto`` version 2.1.2 or greater and re-upload
-your music.
-
-Sorry for the inconvenience.
-
 
 ## Installation
 
