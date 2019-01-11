@@ -10,6 +10,7 @@ from logzero import logger
 from google_music_scripts.__about__ import __title__, __version__
 from google_music_scripts.cli import (
 	CustomPath,
+	TemplatePath,
 	default_to_cwd,
 	parse_filters,
 	split_album_art_paths
@@ -94,7 +95,7 @@ def sync():
 	'-o', '--output',
 	metavar='TEMPLATE_PATH',
 	default=os.getcwd(),
-	type=CustomPath(),
+	type=TemplatePath(),
 	help="Output file or directory name which can include template patterns."
 )
 @click.option(

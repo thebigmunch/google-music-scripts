@@ -1,16 +1,17 @@
 import logging
-import os
 import time
+from pathlib import Path
 
 import appdirs
 import logzero
+from tomlkit.toml_document import TOMLDocument
 from tomlkit.toml_file import TOMLFile
 
 from .__about__ import __author__, __title__
 
-CONFIG_DIR = appdirs.user_config_dir(__title__, __author__)
+CONFIG_BASE_PATH = Path(appdirs.user_config_dir(__title__, __author__))
 
-LOG_BASE_PATH = os.path.join(appdirs.user_data_dir(__title__, __author__))
+LOG_BASE_PATH = Path(appdirs.user_data_dir(__title__, __author__))
 LOG_FORMAT = '%(color)s[%(asctime)s]%(end_color)s %(message)s'
 LOG_FILE_FORMAT = '[%(asctime)s] %(message)s'
 
@@ -44,11 +45,13 @@ def get_config(*, username=None):
 
 
 def read_config_file(username=None):
-	config_file = TOMLFile(os.path.join(CONFIG_DIR, username or '', 'google-music-scripts.toml'))
+	config_path = CONFIG_BASE_PATH / (username or '') / 'google-music-scripts.toml'
+	config_file = TOMLFile(config_path)
+
 	try:
 		config = config_file.read()
 	except FileNotFoundError:
-		config = {}
+		config = TOMLDocument()
 
 	write_config_file(config, username=username)
 
@@ -56,19 +59,17 @@ def read_config_file(username=None):
 
 
 def write_config_file(config, username=None):
-	os.makedirs(os.path.join(CONFIG_DIR, username or ''), exist_ok=True)
+	config_path = CONFIG_BASE_PATH / (username or '') / 'google-music-scripts.toml'
+	config_path.parent.mkdir(parents=True, exist_ok=True)
+	config_path.touch()
 
-	config_file = TOMLFile(os.path.join(CONFIG_DIR, username or '', 'google-music-scripts.toml'))
+	config_file = TOMLFile(config_path)
 	config_file.write(config)
 
 
 def ensure_log_dir(username=None):
-	log_dir = os.path.join(LOG_BASE_PATH, username or '', 'logs')
-	try:
-		os.makedirs(log_dir)
-	except OSError:
-		if not os.path.isdir(log_dir):
-			raise
+	log_dir = LOG_BASE_PATH / (username or '') / 'logs'
+	log_dir.mkdir(parents=True, exist_ok=True)
 
 	return log_dir
 
@@ -146,9 +147,7 @@ def configure_logging(modifier=0, username=None, *, log_to_file=False):
 
 	if log_to_file:
 		log_dir = ensure_log_dir(username=username)
-		log_file = os.path.join(
-			log_dir, time.strftime('%Y-%m-%d_%H-%M-%S') + '.log'
-		)
+		log_file = (log_dir / time.strftime('%Y-%m-%d_%H-%M-%S')).with_suffix('.log')
 		file_formatter = logzero.LogFormatter(
 			fmt=LOG_FILE_FORMAT, datefmt='%Y-%m-%d %H:%M:%S'
 		)

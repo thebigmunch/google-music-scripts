@@ -2,6 +2,7 @@
 
 import os
 import re
+from pathlib import Path
 
 import click
 
@@ -112,6 +113,18 @@ class CustomPath(click.Path):
 		if os.name == 'nt' and UNIX_PATH_RE.match(value):
 			value = convert_cygwin_path(value)
 
+		value = Path(value)
+
+		return super().convert(value, param, ctx)
+
+
+# I use Windows Python install from Cygwin.
+# This custom click type converts Unix-style paths to Windows-style paths in this case.
+class TemplatePath(click.Path):
+	def convert(self, value, param, ctx):
+		if os.name == 'nt' and UNIX_PATH_RE.match(value):
+			value = str(convert_cygwin_path(value))
+
 		return super().convert(value, param, ctx)
 
 
@@ -119,7 +132,7 @@ class CustomPath(click.Path):
 # Necessary because click does not support setting a default directly when using nargs=-1.
 def default_to_cwd(ctx, param, value):
 	if not value:
-		value = (os.getcwd(),)
+		value = (Path.cwd(),)
 
 	return value
 
@@ -148,7 +161,7 @@ def split_album_art_paths(ctx, param, value):
 			if os.name == 'nt' and UNIX_PATH_RE.match(val.strip()):
 				paths.append(convert_cygwin_path(val.strip()))
 			else:
-				paths.append(val)
+				paths.append(Path(val))
 
 	return paths
 

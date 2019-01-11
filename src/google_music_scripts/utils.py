@@ -1,14 +1,13 @@
 __all__ = [
 	'convert_cygwin_path',
-	'delete_file',
 	'get_album_art_path',
 	'get_supported_filepaths',
-	'template_to_base_path',
-	'walk_depth'
+	'template_to_base_path'
 ]
 
 import os
 import subprocess
+from pathlib import Path
 
 import audio_metadata
 import google_music_utils as gm_utils
@@ -40,31 +39,22 @@ def convert_cygwin_path(filepath):
 		logger.exception("Call to cygpath failed.")
 		raise
 
-	return win_path
+	return Path(win_path)
 
 
-def delete_file(filepath):
-	try:
-		os.remove(filepath)
-	except (OSError, PermissionError):
-		logger.warning(f"Failed to remove file: {filepath}.")
-
-
-def get_album_art_path(song, album_art_names):
+def get_album_art_path(song, album_art_paths):
 	album_art_path = None
-	if album_art_names:
-		dirname = os.path.dirname(song)
-
-		for name in album_art_names:
+	if album_art_paths:
+		for path in album_art_paths:
 			if (
-				os.path.isabs(name)
-				and os.path.isfile(name)
+				path.is_absolute()
+				and path.isfile()
 			):
-				album_art_path = name
+				album_art_path = path
 				break
 			else:
-				path = os.path.join(dirname, name)
-				if os.path.isfile(path):
+				path = song.parent / path
+				if path.is_file():
 					album_art_path = path
 					break
 
@@ -87,28 +77,22 @@ def get_supported_filepaths(filepaths, max_depth=float('inf')):
 
 	supported_filepaths = []
 
-	for path in filepaths:
-		if os.path.isdir(path):
-			for root, __, files in walk_depth(path, max_depth):
-				for file_ in files:
-					filepath = os.path.join(root, file_)
+	for filepath in filepaths:
+		path = Path(filepath)
 
-					with open(filepath, 'rb') as f:
-						if (
-							audio_metadata.determine_format(
-								f.read(4), extension=os.path.splitext(filepath)[1]
-							)
-							is not None
-						):
-							supported_filepaths.append(filepath)
-		elif os.path.isfile(path):
-			with open(path, 'rb') as f:
-				if (
-					audio_metadata.determine_format(
-						f.read(4), extension=os.path.splitext(path)[1]
-					)
-					is not None
-				):
+		if path.is_dir():
+			for p in path.glob('**/*'):
+				if p.is_file():
+					with p.open('rb') as f:
+						if audio_metadata.determine_format(
+							f.read(4), extension=p.suffix
+						) is not None:
+							supported_filepaths.append(p)
+		elif path.is_file():
+			with path.open('rb') as f:
+				if audio_metadata.determine_format(
+					f.read(4), extension=path.suffix
+				) is not None:
 					supported_filepaths.append(path)
 
 	return supported_filepaths
@@ -117,41 +101,18 @@ def get_supported_filepaths(filepaths, max_depth=float('inf')):
 def template_to_base_path(template, google_songs):
 	"""Get base output path for a list of songs for download."""
 
-	if template == os.getcwd() or template == '%suggested%':
-		base_path = os.getcwd()
+	path = Path(template)
+
+	if (
+		path == Path.cwd()
+		or path == Path('%suggested%')
+	):
+		base_path = Path.cwd()
 	else:
 		song_paths = [
-			os.path.abspath(gm_utils.template_to_filepath(template, song))
+			gm_utils.template_to_filepath(template, song)
 			for song in google_songs
 		]
-		base_path = os.path.commonpath(song_paths)
+		base_path = Path(os.path.commonpath(song_paths))
 
-	return base_path
-
-
-def walk_depth(path, max_depth=float('inf')):
-	"""Walk a directory tree with configurable depth.
-
-	Parameters:
-		path (str): A directory path to walk.
-
-		max_depth (int): The depth in the directory tree to walk.
-			A depth of '0' limits the walk to the top directory.
-			Default: No limit.
-
-	Yields:
-		tuple: A 3-tuple ``(root, dirs, files)`` same as :func:`os.walk`.
-	"""
-
-	path = os.path.abspath(path)
-
-	start_level = path.count(os.path.sep)
-
-	for dir_entry in os.walk(path):
-		root, dirs, _ = dir_entry
-		level = root.count(os.path.sep) - start_level
-
-		yield dir_entry
-
-		if level >= max_depth:
-			dirs[:] = []
+	return base_path.resolve()

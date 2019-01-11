@@ -1,7 +1,5 @@
-import os
-import shutil
-import tempfile
 from collections import defaultdict
+from pathlib import Path
 
 import audio_metadata
 import google_music_utils as gm_utils
@@ -14,7 +12,7 @@ def download_songs(mm, songs, template=None):
 	logger.info(f"Downloading {len(songs)} songs from Google Music")
 
 	if not template:
-		template = os.getcwd()
+		template = Path.cwd()
 
 	songnum = 0
 	total = len(songs)
@@ -31,22 +29,15 @@ def download_songs(mm, songs, template=None):
 				extra={'success': False}
 			)
 		else:
-			temp = tempfile.NamedTemporaryFile(suffix='.mp3', delete=False)
-			temp.write(audio)
+			tags = audio_metadata.loads(audio).tags
+			filepath = gm_utils.template_to_filepath(template, tags).with_suffix('.mp3')
 
-			tags = audio_metadata.load(temp.name).tags
-			filepath = gm_utils.template_to_filepath(template, tags) + '.mp3'
-			dirname = os.path.dirname(filepath)
+			if filepath.is_file():
+				filepath.unlink()
 
-			if dirname:
-				try:
-					os.makedirs(dirname)
-				except OSError:
-					if not os.path.isdir(dirname):
-						raise
-
-			temp.close()
-			shutil.move(temp.name, filepath)
+			filepath.parent.mkdir(parents=True, exist_ok=True)
+			filepath.touch()
+			filepath.write_bytes(audio)
 
 			logger.info(
 				f"({songnum:>{pad}}/{total}) Downloaded -- {filepath} ({song['id']})",
@@ -162,8 +153,8 @@ def upload_songs(
 
 		if delete_on_success and 'song_id' in result:
 			try:
-				os.remove(result['filepath'])
-			except (OSError):
+				result['filepath'].unlink()
+			except Exception:
 				logger.warning(
 					f"Failed to remove {result['filepath']} after successful upload"
 				)
