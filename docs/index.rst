@@ -79,12 +79,12 @@ Transcoding - ffmpeg/avconv
 ---------------------------
 
 Non-MP3 files require ffmpeg or avconv to be in your
-PATH to transcode those files to MP3 for upload
+PATH to transcode them to MP3 for upload
 
 Google Music requires an audio sample be sent for most uploads.
 ffmpeg/avconv is used for this as well unless the ``--no-sample``
 option is given. In this case, an empty audio sample is sent.
-If uploading MP3s, ffmpeg/avconv is not required with ``no-sample``.
+If uploading MP3s, ffmpeg/avconv is not required with ``--no-sample``.
 
 
 Aliases
