@@ -111,6 +111,7 @@ def upload_songs(
 	mm,
 	filepaths,
 	album_art=None,
+	no_sample=False,
 	delete_on_success=False
 ):
 	logger.info(f"Uploading {len(filepaths)} songs to Google Music")
@@ -126,7 +127,8 @@ def upload_songs(
 
 		result = mm.upload(
 			song,
-			album_art_path=album_art_path
+			album_art_path=album_art_path,
+			no_sample=no_sample
 		)
 
 		if result['reason'] == 'Uploaded':

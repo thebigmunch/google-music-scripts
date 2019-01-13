@@ -230,6 +230,12 @@ def sync_down(
 	help="Set maximum depth of recursion when scanning for local files.\nDefault is infinite recursion."
 )
 @click.option(
+	'--no-sample',
+	is_flag=True,
+	default=False,
+	help="Don't create audio sample with ffmpeg/avconv; send empty audio sample."
+)
+@click.option(
 	'--delete-on-success',
 	is_flag=True,
 	default=False,
@@ -262,6 +268,7 @@ def sync_up(
 	uploader_id,
 	no_recursion,
 	max_depth,
+	no_sample,
 	delete_on_success,
 	filters,
 	album_art,
@@ -308,6 +315,7 @@ def sync_up(
 			mm,
 			to_upload,
 			album_art=album_art,
+			no_sample=no_sample,
 			delete_on_success=delete_on_success
 		)
 

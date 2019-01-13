@@ -11,6 +11,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 ### Added
 
 * Option to specify external album art names/paths with upload commands.
+* ``--no-sample`` option to ``gms upload`` and ``gms sync up``.
+  This sends an empty audio sample instead of creating one with ffmpeg/avconv.
+  If uploading MP3s, this option completely removes the ffmpeg/avconv requirement.
+  Otherwise, this will save time/bandwidth by not creating nor sending a sample.
 
 ### Removed
 
@@ -21,7 +25,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
 ### Fixed
 
 * ``TypeError`` when sorting Google Music songs due to no defaults
-  being set for ``get`` calls in key.
+  being set for ``get`` calls.
 
 
 ## [2.0.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/2.0.0) (2018-11-26)
