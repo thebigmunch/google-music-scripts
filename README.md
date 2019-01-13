@@ -1,6 +1,7 @@
 # google-music-scripts
 
-[![Read the Docs](https://img.shields.io/readthedocs/google-music-scripts.svg)](https://google-music-scripts.readthedocs.io)
+[![Read the Docs - Stable](https://img.shields.io/readthedocs/google-music-scripts/stable.svg?label=stable%20docs)](https://google-music-scripts.readthedocs.io/en/stable/)
+[![Read the Docs - Latest](https://img.shields.io/readthedocs/google-music-scripts/latest.svg?label=latest%20docs)](https://google-music-scripts.readthedocs.io/en/latest/)
 
 [google-music-scripts](https://github.com/thebigmunch/google-music-scripts)
 is a CLI utility for interacting with Google Music using my alternative to
