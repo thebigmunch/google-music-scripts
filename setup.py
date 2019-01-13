@@ -29,15 +29,27 @@ setup(
 
 	install_requires=[
 		'appdirs>=1.4',
-		'audio-metadata>=0.2',
-		'click>=6.0',
+		'audio-metadata>=0.3',
+		'click>=6.0,<8.0',
 		'click-default-group>=1.2',
-		'google-music>=2.1',
-		'google-music-utils>=1.1',
+		'google-music>=3.0',
+		'google-music-utils>=2.0',
 		'logzero>=1.5',
-		'sphinx-click>=1.0',
 		'tomlkit>=0.5'
 	],
+
+	extras_require={
+		'doc': [
+			'sphinx',
+			'sphinx-click>=1.0'
+		],
+		'lint': [
+			'flake8',
+			'flake8-builtins',
+			'flake8-import-order',
+			'flake8-import-order-tbm'
+		],
+	},
 
 	packages=find_packages('src'),
 	package_dir={
