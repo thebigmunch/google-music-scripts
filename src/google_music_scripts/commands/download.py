@@ -56,7 +56,7 @@ from google_music_scripts.core import download_songs, filter_songs
 	help="Output file or directory name which can include template patterns."
 )
 @click.option(
-	'-f', '--filters',
+	'-f', '--filter', 'filters',
 	metavar='FILTER',
 	multiple=True,
 	callback=parse_filters,

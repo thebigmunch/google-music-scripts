@@ -77,7 +77,7 @@ from google_music_scripts.core import get_local_songs, upload_songs
 	help="Delete successfully uploaded local files."
 )
 @click.option(
-	'-f', '--filters',
+	'-f', '--filter', 'filters',
 	metavar='FILTER',
 	multiple=True,
 	callback=parse_filters,

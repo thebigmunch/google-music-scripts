@@ -53,7 +53,7 @@ from google_music_scripts.core import filter_songs
 	help="Delete songs without asking for confirmation."
 )
 @click.option(
-	'-f', '--filters',
+	'-f', '--filter', 'filters',
 	metavar='FILTER',
 	multiple=True,
 	callback=parse_filters,

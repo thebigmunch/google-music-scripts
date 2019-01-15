@@ -56,7 +56,7 @@ Nested commands work the same::
 Filtering
 ---------
 
-A number of ``gms`` commands allow filtering results based on song metadata (``-f, --filters``).
+A number of ``gms`` commands allow filtering results based on song metadata (``-f, --filter``).
 The syntax is as follows:
 
 	* ``+field[value]`` to include filter condition.

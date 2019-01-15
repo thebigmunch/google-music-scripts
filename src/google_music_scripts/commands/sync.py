@@ -92,18 +92,18 @@ def sync():
 	help="Set maximum depth of recursion when scanning for local files.\nDefault is infinite recursion."
 )
 @click.option(
+	'-f', '--filter', 'filters',
+	metavar='FILTER',
+	multiple=True,
+	callback=parse_filters,
+	help="Metadata filters."
+)
+@click.option(
 	'-o', '--output',
 	metavar='TEMPLATE_PATH',
 	default=os.getcwd(),
 	type=TemplatePath(),
 	help="Output file or directory name which can include template patterns."
-)
-@click.option(
-	'-f', '--filters',
-	metavar='FILTER',
-	multiple=True,
-	callback=parse_filters,
-	help="Metadata filters."
 )
 @click.argument('include-paths', nargs=-1, type=CustomPath(resolve_path=True))
 def sync_down(
@@ -115,8 +115,8 @@ def sync_down(
 	uploader_id,
 	no_recursion,
 	max_depth,
-	output,
 	filters,
+	output,
 	include_paths
 ):
 	"""Sync songs from a Google Music library."""
@@ -242,7 +242,7 @@ def sync_down(
 	help="Delete successfully uploaded local files."
 )
 @click.option(
-	'-f', '--filters',
+	'-f', '--filter', 'filters',
 	metavar='FILTER',
 	multiple=True,
 	callback=parse_filters,
