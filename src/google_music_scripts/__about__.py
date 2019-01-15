@@ -21,4 +21,4 @@ __author__ = 'thebigmunch'
 __author_email__ = 'mail@thebigmunch.me'
 
 __license__ = 'MIT'
-__copyright__ = f'2018 {__author__} <{__author_email__}>'
+__copyright__ = f'2018-2019 {__author__} <{__author_email__}>'
