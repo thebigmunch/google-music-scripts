@@ -6,7 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased](https://github.com/thebigmunch/google-music-scripts/tree/master)
 
-[Commits](https://github.com/thebigmunch/google-music-scripts/compare/2.0.0...master)
+[Commits](https://github.com/thebigmunch/google-music-scripts/compare/3.0.0...master)
+
+
+## [3.0.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/3.0.0) (2019-01-15)
+
+[Commits](https://github.com/thebigmunch/google-music-scripts/compare/2.0.0...3.0.0)
 
 ### Added
 
@@ -15,6 +20,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
   This sends an empty audio sample instead of creating one with ffmpeg/avconv.
   If uploading MP3s, this option completely removes the ffmpeg/avconv requirement.
   Otherwise, this will save time/bandwidth by not creating nor sending a sample.
+
+### Changed
+
+* ``--filters`` long option to ``--filter``.
 
 ### Removed
 
