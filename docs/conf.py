@@ -15,7 +15,7 @@ with open(os.path.join(project_dir, 'src', 'google_music_scripts', '__about__.py
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-	'sphinx_click.ext'
+	'sphinxarg.ext'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -73,8 +73,7 @@ todo_include_todos = True
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-	'python': ('https://docs.python.org/3', None),
-	'click': ('http://click.pocoo.org', None)
+	'python': ('https://docs.python.org/3', None)
 }
 
 # -- Options for HTML output ----------------------------------------------

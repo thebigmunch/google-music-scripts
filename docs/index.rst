@@ -106,6 +106,7 @@ Command-Line Interface
 
 Use ``-h, --help`` to display the help for any command.
 
-.. click:: google_music_scripts.cli:gms
+.. argparse::
+	:module: google_music_scripts.cli
+	:func: gms
 	:prog: gms
-	:show-nested:

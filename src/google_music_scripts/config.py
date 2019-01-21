@@ -1,5 +1,6 @@
 import logging
 import time
+from collections.abc import Mapping
 from pathlib import Path
 
 import appdirs
@@ -8,6 +9,27 @@ from tomlkit.toml_document import TOMLDocument
 from tomlkit.toml_file import TOMLFile
 
 from .__about__ import __author__, __title__
+from .utils import DictMixin
+
+COMMAND_ALIASES = {
+	'del': 'delete',
+	'delete': 'del',
+	'down': 'delete',
+	'download': 'down',
+	'up': 'upload',
+	'upload': 'up'
+}
+COMMAND_KEYS = {
+	'del',
+	'delete',
+	'down',
+	'download',
+	'quota',
+	'search',
+	'sync',
+	'up',
+	'upload'
+}
 
 CONFIG_BASE_PATH = Path(appdirs.user_config_dir(__title__, __author__))
 
@@ -29,19 +51,73 @@ VERBOSITY_LOG_LEVELS = {
 
 
 def convert_default_keys(item):
-	if isinstance(item, dict):
-		return {
-			k.lstrip('-').replace('-', '_'): convert_default_keys(v)
-			for k, v in item.items()
-		}
+	if isinstance(item, Mapping):
+		converted = item.__class__()
+		for k, v in item.items():
+			converted[k.lstrip('-').replace('-', '_')] = convert_default_keys(v)
+
+		return converted
 	else:
 		return item
 
 
-def get_config(*, username=None):
-	config = read_config_file(username)
+def get_defaults(command, *, username=None):
+	config_defaults = read_config_file(username).get('defaults')
+	defaults = DictMixin()
 
-	return config
+	if config_defaults:
+		defaults.update(
+			(k, v)
+			for k, v in config_defaults.items()
+			if k not in COMMAND_KEYS
+		)
+
+		if command[0] in config_defaults:
+			defaults.update(
+				(k, v)
+				for k, v in config_defaults[command[0]].items()
+				if k not in COMMAND_KEYS
+			)
+
+			if len(command) == 2:
+				subcmd_alias = COMMAND_ALIASES.get(command[1], '')
+				if command[1] in config_defaults[command[0]]:
+					defaults.update(
+						(k, v)
+						for k, v in config_defaults[command[0]][command[1]].items()
+						if k not in COMMAND_KEYS
+					)
+				elif subcmd_alias in config_defaults[command[0]]:
+					defaults.update(
+						(k, v)
+						for k, v in config_defaults[command[0]][subcmd_alias].items()
+						if k not in COMMAND_KEYS
+					)
+
+		cmd_alias = COMMAND_ALIASES.get(command[0], '')
+		if cmd_alias in config_defaults:
+			defaults.update(
+				(k, v)
+				for k, v in config_defaults[cmd_alias].items()
+				if k not in COMMAND_KEYS
+			)
+
+			if len(command) == 2:
+				subcmd_alias = COMMAND_ALIASES.get(command[1], '')
+				if command[1] in config_defaults[cmd_alias]:
+					defaults.update(
+						(k, v)
+						for k, v in config_defaults[cmd_alias][command[1]].items()
+						if k not in COMMAND_KEYS
+					)
+				elif subcmd_alias in config_defaults[command[0]]:
+					defaults.update(
+						(k, v)
+						for k, v in config_defaults[cmd_alias][subcmd_alias].items()
+						if k not in COMMAND_KEYS
+					)
+
+	return convert_default_keys(defaults)
 
 
 def read_config_file(username=None):

@@ -1,155 +1,90 @@
-"""Command line interface of google-music-scripts."""
-
+import argparse
+import math
 import os
 import re
 from pathlib import Path
 
-import click
-
-from . import __title__, __version__
-from .config import convert_default_keys, get_config
-from .constants import UNIX_PATH_RE
-from .utils import convert_cygwin_path
-
-CMD_ALIASES = {
-	'del': 'delete',
-	'down': 'download',
-	'up': 'upload'
-}
-CONTEXT_SETTINGS = dict(
-	help_option_names=['-h', '--help'],
-	max_content_width=200
+from .__about__ import __title__, __version__
+from .commands import (
+	do_delete,
+	do_download,
+	do_quota,
+	do_search,
+	do_sync_down,
+	do_sync_up,
+	do_upload
 )
+from .config import configure_logging, get_defaults
+from .constants import UNIX_PATH_RE
+from .utils import DictMixin, convert_cygwin_path
+
 FILTER_RE = re.compile(r'(([+-]+)?(.*?)\[(.*?)\])', re.I)
-PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'commands')
+
+DISPATCH = {
+	('del',): do_delete,
+	('delete',): do_delete,
+	('down',): do_download,
+	('download',): do_download,
+	('quota',): do_quota,
+	('search',): do_search,
+	('sync', 'down'): do_sync_down,
+	('sync', 'up'): do_sync_up,
+	('up',): do_upload,
+	('upload',): do_upload
+}
 
 
-class AliasedGroup(click.Group):
-	def get_command(self, ctx, alias):
-		cmd = CMD_ALIASES.get(alias, alias)
+class Namespace(DictMixin):
+	pass
 
-		ns = {}
-		filepath = os.path.join(os.path.join(PLUGIN_DIR, cmd + '.py'))
-		with open(filepath) as f:
-			code = compile(f.read(), filepath, 'exec')
-			eval(code, ns, ns)
 
-		return ns[cmd]
+class UsageHelpFormatter(argparse.RawTextHelpFormatter):
+	def add_usage(self, usage, actions, groups, prefix="Usage: "):
+		super().add_usage(usage, actions, groups, prefix)
 
-	def list_commands(self, ctx):
-		rv = []
-		for filename in os.listdir(PLUGIN_DIR):
-			if filename.endswith('.py') and not filename == '__init__.py':
-				rv.append(filename[:-3])
 
-		rv.sort()
+# Removes the command list while leaving the usage metavar intact.
+class SubcommandHelpFormatter(UsageHelpFormatter):
+	def _format_action(self, action):
+		parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
+		if action.nargs == argparse.PARSER:
+			parts = "\n".join(parts.split("\n")[1:])
+		return parts
 
-		return rv
 
-	def make_context(self, *args, **kwargs):
-		ctx = super().make_context(
-			*args,
-			help_option_names=['-h', '--help'],
-			max_content_width=200,
-			**kwargs
-		)
-
-		username = ''
-		for i, arg in enumerate(ctx.args):
-			if arg in ('-u', '--username'):
-				username = ctx.args[i + 1]
-				break
-
-		defaults = convert_default_keys(
-			get_config(username=username).get('defaults', {})
-		)
-
-		if defaults:
-			global_defaults = {
-				k: v
-				for k, v in defaults.items()
-				if k not in self.list_commands(ctx)
-			}
-
-			default_map = {}
-			for command in self.list_commands(ctx):
-				if command == 'sync':
-					default_map['sync'] = {**global_defaults}
-					sync_defaults = {
-						k: v
-						for k, v in defaults.get('sync', {}).items()
-						if k not in ['down', 'up']
-					}
-					default_map['sync'].update(sync_defaults)
-
-					for subcommand in ['down', 'up']:
-						default_map['sync'][subcommand] = {**global_defaults}
-						default_map['sync'][subcommand].update(sync_defaults)
-						default_map['sync'][subcommand].update(
-							defaults.get('sync', {}).get(subcommand, {})
-						)
-				else:
-					default_map[command] = {**global_defaults}
-					default_map[command].update(
-						defaults.get(command, {})
-					)
-
-					for alias, cmd in CMD_ALIASES.items():
-						if command == cmd:
-							default_map[alias] = {**default_map[command]}
-							default_map[alias].update(
-								defaults.get(alias, {})
-							)
-
-			ctx.default_map = default_map
-
-		return ctx
-
+#########
+# Utils #
+#########
 
 # I use Windows Python install from Cygwin.
 # This custom click type converts Unix-style paths to Windows-style paths in this case.
-class CustomPath(click.Path):
-	def convert(self, value, param, ctx):
-		if os.name == 'nt' and UNIX_PATH_RE.match(value):
-			value = convert_cygwin_path(value)
+def custom_path(value):
+	if os.name == 'nt' and UNIX_PATH_RE.match(str(value)):
+		value = Path(convert_cygwin_path(str(value)))
 
-		value = Path(value)
-
-		return super().convert(value, param, ctx)
-
-
-# I use Windows Python install from Cygwin.
-# This custom click type converts Unix-style paths to Windows-style paths in this case.
-class TemplatePath(click.Path):
-	def convert(self, value, param, ctx):
-		if os.name == 'nt' and UNIX_PATH_RE.match(value):
-			value = str(convert_cygwin_path(value))
-
-		return super().convert(value, param, ctx)
-
-
-# Callback used to allow input/output arguments to default to current directory.
-# Necessary because click does not support setting a default directly when using nargs=-1.
-def default_to_cwd(ctx, param, value):
-	if not value:
-		value = (Path.cwd(),)
+	value = Path(value)
 
 	return value
 
 
-def parse_filters(ctx, param, value):
-	filters = []
-	for filter_ in value:
-		conditions = FILTER_RE.findall(filter_)
-		if not conditions:
-			raise ValueError(f"'{filter_}' is not a valid filter.")
-
-		filters.append(conditions)
-
-	return filters
+def default_to_cwd():
+	return Path.cwd()
 
 
-def split_album_art_paths(ctx, param, value):
+def parse_filter(value):
+	conditions = FILTER_RE.findall(value)
+	if not conditions:
+		raise ValueError(f"'{value}' is not a valid filter.")
+
+	filter_ = [
+		tuple(condition[1:])
+		for condition in conditions
+	]
+
+	return filter_
+
+
+def split_album_art_paths(value):
 	paths = value
 	if value:
 		paths = []
@@ -166,14 +101,454 @@ def split_album_art_paths(ctx, param, value):
 	return paths
 
 
-@click.group(cls=AliasedGroup)
-@click.version_option(
-	__version__,
-	'-V', '--version',
-	prog_name=__title__,
-	message="%(prog)s %(version)s"
-)
-def gms():
-	"""A collection of scripts to interact with Google Music."""
+########
+# Meta #
+########
 
-	pass
+meta = argparse.ArgumentParser(
+	add_help=False
+)
+
+meta_options = meta.add_argument_group("Options")
+meta_options.add_argument(
+	'-h', '--help',
+	action='help'
+)
+meta_options.add_argument(
+	'-V', '--version',
+	action='version',
+	version=f"{__title__} {__version__}",
+	help=""
+)
+
+
+###########
+# Logging #
+###########
+
+logging_ = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+logging_options = logging_.add_argument_group("Logging")
+logging_options.add_argument(
+	'-l', '--log',
+	action='store_true',
+	help="Log to file."
+)
+logging_options.add_argument(
+	'-v', '--verbose',
+	action='count',
+	help="Increase verbosity of output."
+)
+logging_options.add_argument(
+	'-q', '--quiet',
+	action='count',
+	help="Decrease verbosity of output."
+)
+logging_options.add_argument(
+	'-n', '--dry-run',
+	action='store_true',
+	help="Output list of songs that would be uploaded."
+)
+
+
+##########
+# Mobile #
+##########
+
+mobile = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+mc_ident_options = mobile.add_argument_group("Identification")
+mc_ident_options.add_argument(
+	'-u', '--username',
+	metavar='USER',
+	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
+)
+mc_ident_options.add_argument(
+	'--device-id',
+	metavar='ID',
+	help="A mobile device id."
+)
+
+
+#################
+# Music Manager #
+#################
+
+music_manager = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+mm_ident_options = music_manager.add_argument_group("Identification")
+mm_ident_options.add_argument(
+	'-u', '--username',
+	metavar='USER',
+	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
+)
+mm_ident_options.add_argument(
+	'--uploader-id',
+	metavar='ID',
+	help="A unique id given as a MAC address (e.g. '00:11:22:33:AA:BB').\nThis should only be provided when the default does not work."
+)
+
+
+#########
+# Local #
+#########
+
+local = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+local_options = local.add_argument_group("Local")
+local_options.add_argument(
+	'--no-recursion',
+	action='store_true',
+	help="Disable recursion when scanning for local files.\nRecursion is enabled by default."
+)
+local_options.add_argument(
+	'--max-depth',
+	metavar='DEPTH',
+	type=int,
+	help="Set maximum depth of recursion when scanning for local files.\nDefault is infinite recursion."
+)
+
+
+##########
+# Filter #
+##########
+
+filter_ = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+filter_options = filter_.add_argument_group("Filter")
+filter_options.add_argument(
+	'-f', '--filter',
+	metavar='FILTER',
+	action='append',
+	dest='filters',
+	type=parse_filter,
+	help="Metadata filters."
+)
+
+
+#######
+# Yes #
+#######
+
+yes = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+yes_options = yes.add_argument_group("Misc")
+yes_options.add_argument(
+	'-y', '--yes',
+	action='store_true',
+	help="Don't ask for confirmation."
+)
+
+
+###############
+# Upload Misc #
+###############
+
+
+upload_misc = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+upload_misc_options = upload_misc.add_argument_group("Misc")
+upload_misc_options.add_argument(
+	'--delete-on-success',
+	action='store_true',
+	help="Delete successfully uploaded local files."
+)
+upload_misc_options.add_argument(
+	'--no-sample',
+	action='store_true',
+	help="Don't create audio sample with ffmpeg/avconv.\nSend empty audio sample."
+)
+upload_misc_options.add_argument(
+	'--album-art',
+	metavar='ART_PATHS',
+	type=split_album_art_paths,
+	help="Comma-separated list of album art filepaths.\nCan be relative filenames and/or absolute filepaths."
+)
+
+
+##########
+# Output #
+##########
+
+output = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+output_options = output.add_argument_group("Output")
+output_options.add_argument(
+	'-o', '--output',
+	metavar='TEMPLATE_PATH',
+	type=lambda t: str(custom_path(t)),
+	help="Output file or directory name which can include template patterns."
+)
+
+
+###########
+# Include #
+###########
+
+include = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+include_options = include.add_argument_group("Include")
+include_options.add_argument(
+	'include',
+	metavar='PATH',
+	type=lambda p: custom_path(p).resolve(),
+	nargs='*',
+	help="Local paths to include songs from."
+)
+
+
+#######
+# gms #
+#######
+
+gms = argparse.ArgumentParser(
+	prog='gms',
+	description="A collection of scripts to interact with Google Music.",
+	usage=argparse.SUPPRESS,
+	parents=[meta],
+	formatter_class=SubcommandHelpFormatter,
+	add_help=False
+)
+
+subcommands = gms.add_subparsers(
+	title="Commands",
+	dest='_command',
+	metavar="<command>"
+)
+
+
+##########
+# Delete #
+##########
+
+delete_command = subcommands.add_parser(
+	'delete',
+	aliases=['del'],
+	description="Delete song(s) from Google Music.",
+	help="Delete song(s) from Google Music.",
+	formatter_class=UsageHelpFormatter,
+	usage="gms delete [OPTIONS]",
+	parents=[meta, logging_, mobile, filter_, yes],
+	add_help=False
+)
+
+
+############
+# Download #
+############
+
+download_command = subcommands.add_parser(
+	'download',
+	aliases=['down'],
+	description="Download song(s) from Google Music.",
+	help="Download song(s) from Google Music.",
+	formatter_class=UsageHelpFormatter,
+	usage="gms download [OPTIONS]",
+	parents=[meta, logging_, music_manager, filter_, output],
+	add_help=False
+)
+
+
+#########
+# Quota #
+#########
+
+quota_command = subcommands.add_parser(
+	'quota',
+	description="Get the uploaded song count and allowance.",
+	help="Get the uploaded song count and allowance.",
+	formatter_class=UsageHelpFormatter,
+	usage="gms quota [OPTIONS]",
+	parents=[meta, logging_, music_manager],
+	add_help=False
+)
+
+
+##########
+# Search #
+##########
+
+search_command = subcommands.add_parser(
+	'search',
+	description="Search a Google Music library for songs.",
+	help="Search for Google Music library songs.",
+	formatter_class=UsageHelpFormatter,
+	usage="gms search [OPTIONS]",
+	parents=[meta, logging_, mobile, filter_, yes],
+	add_help=False
+)
+
+
+########
+# Sync #
+########
+
+sync_command = subcommands.add_parser(
+	'sync',
+	help="",
+	formatter_class=SubcommandHelpFormatter,
+	usage=argparse.SUPPRESS,
+	parents=[meta],
+	add_help=False
+)
+
+sync_subcommands = sync_command.add_subparsers(
+	title="Commands",
+	dest='_sync_command',
+	metavar="<command>"
+)
+
+sync_subcommands.add_parser(
+	'download',
+	aliases=['down'],
+	description="Sync song(s) from Google Music.",
+	help="Sync song(s) from Google Music.",
+	formatter_class=UsageHelpFormatter,
+	usage="gms sync down [OPTIONS] [INCLUDE_PATH]...",
+	parents=[meta, logging_, music_manager, local, filter_, output, include],
+	add_help=False
+)
+
+sync_subcommands.add_parser(
+	'upload',
+	aliases=['up'],
+	description="Sync song(s) to Google Music.",
+	help="Sync song(s) to Google Music.",
+	formatter_class=UsageHelpFormatter,
+	usage="gms sync up [OPTIONS] [INCLUDE_PATH]...",
+	parents=[meta, logging_, music_manager, local, filter_, upload_misc, include],
+	add_help=False
+)
+
+
+##########
+# Upload #
+##########
+
+upload_command = subcommands.add_parser(
+	'upload',
+	aliases=['up'],
+	description="Upload song(s) to Google Music.",
+	help="Upload song(s) to Google Music.",
+	formatter_class=UsageHelpFormatter,
+	usage="gms upload [OPTIONS] [INCLUDE_PATH]...",
+	parents=[meta, logging_, music_manager, local, filter_, upload_misc, include],
+	add_help=False
+)
+
+
+def set_defaults(args):
+	defaults = Namespace()
+
+	# Set defaults.
+	defaults.verbose = 0
+	defaults.quiet = 0
+	defaults.log = False
+	defaults.dry_run = False
+	defaults.username = ''
+	defaults.filters = []
+
+	if args._command in ['down', 'download', 'quota', 'sync', 'up', 'upload']:
+		defaults.uploader_id = None
+	else:
+		defaults.device_id = None
+
+	if args._command in ['del', 'delete', 'search']:
+		defaults.yes = False
+
+	if (
+		args._command in ['down', 'download']
+		or args.get('_sync_command') in ['down', 'download']
+	):
+		defaults.output = str(Path('.').resolve())
+		defaults.include = [custom_path('.').resolve()]
+
+	if (
+		args._command in ['up', 'upload']
+		or args.get('_sync_command') in ['up', 'upload']
+	):
+		defaults.delete_on_success = False
+		defaults.no_sample = False
+		defaults.album_art = None
+
+	if args._command in ['sync', 'up', 'upload']:
+		defaults.no_recursion = False
+		defaults.max_depth = math.inf
+		defaults.include = [custom_path('.').resolve()]
+
+	config_defaults = get_defaults(args._command, username=args.get('username'))
+	for k, v in config_defaults.items():
+		if k == 'album_art':
+			defaults.album_art = split_album_art_paths(v)
+		elif k == 'filters':
+			defaults.filters = [
+				parse_filter(filter_)
+				for filter_ in v
+			]
+		elif k == 'max_depth':
+			defaults.max_depth = int(v)
+		elif k == 'output':
+			defaults.output = str(custom_path(v))
+		elif k == 'include':
+			defaults.include = [
+				custom_path(val)
+				for val in v
+			]
+		else:
+			defaults[k] = v
+
+	return defaults
+
+
+def run():
+	parsed = gms.parse_args(namespace=Namespace())
+
+	if '_sync_command' in parsed:
+		if parsed._sync_command:
+			command = (parsed._command, parsed._sync_command)
+		else:
+			gms.parse_args(['sync', '-h'])
+	elif parsed.get('_command'):
+		command = (parsed._command,)
+	else:
+		gms.parse_args(['-h'])
+
+	args = set_defaults(parsed)
+	args.update(parsed)
+
+	if args.get('no_recursion'):
+		args.max_depth = 0
+
+	configure_logging(args.verbose - args.quiet, args.username, log_to_file=args.log)
+
+	try:
+		DISPATCH[command](args)
+	except KeyboardInterrupt:
+		gms.exit(130, "Exiting")

@@ -21,8 +21,6 @@ python = "^3.6"
 
 appdirs = "^1.4"
 audio-metadata = "^0.3"
-click = ">=6.0, <8.0"
-click-default-group = "^1.2"
 google-music = "^3.0"
 google-music-utils = "^2.0"
 logzero = "^1.5"
@@ -33,12 +31,27 @@ flake8-builtins = { version = "^1.0", optional = true }
 flake8-import-order = { version = "^0.18", optional = true }
 flake8-import-order-tbm = { version = "^1.0.0", optional = true }
 sphinx = { version = "^1.7", optional = true }
-sphinx-click = { version = "^1.0", optional = true }
+sphinx-argparse = { version = "^0.2", optional = true }
 
 [tool.poetry.extras]
-dev = [ "flake8", "flake8-builtins", "flake8-import-order", "flake8-import-order-tbm", "sphinx", "sphinx-click" ]
-doc = [ "sphinx", "sphinx-click" ]
-lint = [ "flake8", "flake8-builtins", "flake8-import-order", "flake8-import-order-tbm" ]
+dev = [
+	"flake8",
+	"flake8-builtins",
+	"flake8-import-order",
+	"flake8-import-order-tbm",
+	"sphinx",
+	"sphinx-argparse"
+]
+doc = [
+	"sphinx",
+	"sphinx-argparse"
+]
+lint = [
+	"flake8",
+	"flake8-builtins",
+	"flake8-import-order",
+	"flake8-import-order-tbm"
+]
 
 [tool.poetry.scripts]
-gms = "google_music_scripts.cli:gms"
+gms = "google_music_scripts.cli:run"

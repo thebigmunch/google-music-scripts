@@ -30,8 +30,6 @@ setup(
 	install_requires=[
 		'appdirs>=1.4',
 		'audio-metadata>=0.3',
-		'click>=6.0,<8.0',
-		'click-default-group>=1.2',
 		'google-music>=3.0',
 		'google-music-utils>=2.0',
 		'logzero>=1.5',
@@ -41,7 +39,7 @@ setup(
 	extras_require={
 		'doc': [
 			'sphinx',
-			'sphinx-click>=1.0'
+			'sphinx-argparse'
 		],
 		'lint': [
 			'flake8',
@@ -58,7 +56,7 @@ setup(
 
 	entry_points={
 		'console_scripts': [
-			'gms = google_music_scripts.cli:gms'
+			'gms = google_music_scripts.cli:run'
 		]
 	}
 )

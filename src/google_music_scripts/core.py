@@ -55,7 +55,7 @@ def filter_songs(songs, filters):
 			include_filters = defaultdict(list)
 			exclude_filters = defaultdict(list)
 
-			for _, oper, field, value in filter_:
+			for oper, field, value in filter_:
 				if oper in ['+', '']:
 					include_filters[field].append(value)
 				elif oper == '-':

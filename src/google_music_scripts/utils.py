@@ -1,4 +1,5 @@
 __all__ = [
+	'DictMixin',
 	'convert_cygwin_path',
 	'get_album_art_path',
 	'get_supported_filepaths',
@@ -7,11 +8,60 @@ __all__ = [
 
 import os
 import subprocess
+from collections.abc import MutableMapping
 from pathlib import Path
 
 import audio_metadata
 import google_music_utils as gm_utils
+import pprintpp
 from logzero import logger
+
+
+class DictMixin(MutableMapping):
+	def __getattr__(self, attr):
+		try:
+			return self.__getitem__(attr)
+		except KeyError:
+			raise AttributeError(attr) from None
+
+	def __setattr__(self, attr, value):
+		self.__setitem__(attr, value)
+
+	def __delattr__(self, attr):
+		try:
+			return self.__delitem__(attr)
+		except KeyError:
+			raise AttributeError(attr) from None
+
+	def __getitem__(self, key):
+		return self.__dict__[key]
+
+	def __setitem__(self, key, value):
+		self.__dict__[key] = value
+
+	def __delitem__(self, key):
+		del(self.__dict__[key])
+
+	def __missing__(self, key):
+		return KeyError(key)
+
+	def __iter__(self):
+		return iter(self.__dict__)
+
+	def __len__(self):
+		return len(self.__dict__)
+
+	def __repr__(self, repr_dict=None):
+		return f"<{self.__class__.__name__} ({pprintpp.pformat(self.__dict__)})>"
+
+	def items(self):
+		return self.__dict__.items()
+
+	def keys(self):
+		return self.__dict__.keys()
+
+	def values(self):
+		return self.__dict__.values()
 
 
 def convert_cygwin_path(filepath):

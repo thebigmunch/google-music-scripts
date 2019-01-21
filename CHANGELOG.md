@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/3.0.0...master)
 
+### Changed
+
+* Use argparse instead of click for CLI.
+
 
 ## [3.0.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/3.0.0) (2019-01-15)
 
