@@ -163,6 +163,9 @@ def template_to_base_path(template, google_songs):
 			gm_utils.template_to_filepath(template, song)
 			for song in google_songs
 		]
-		base_path = Path(os.path.commonpath(song_paths))
+		if song_paths:
+			base_path = Path(os.path.commonpath(song_paths))
+		else:
+			base_path = Path.cwd()
 
 	return base_path.resolve()

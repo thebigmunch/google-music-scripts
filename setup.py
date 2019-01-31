@@ -29,10 +29,11 @@ setup(
 
 	install_requires=[
 		'appdirs>=1.4',
-		'audio-metadata>=0.3',
+		'audio-metadata>=0.4',
 		'google-music>=3.0',
-		'google-music-utils>=2.0',
+		'google-music-utils>=2.1',
 		'logzero>=1.5',
+		'natsort>=5.2',
 		'tomlkit>=0.5'
 	],
 

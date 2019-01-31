@@ -3,6 +3,7 @@ import sys
 import google_music
 import google_music_utils as gm_utils
 from logzero import logger
+from natsort import natsorted
 
 from .core import (
 	download_songs,
@@ -71,8 +72,8 @@ def do_download(args):
 	if not mm.is_authenticated:
 		sys.exit("Failed to authenticate client.")
 
-	to_download = filter_songs(mm.songs(), args.filters)
-	to_download.sort(
+	to_download = natsorted(
+		filter_songs(mm.songs(), args.filters),
 		key=lambda song: (
 			song.get('artist', ''),
 			song.get('album', ''),
@@ -119,8 +120,8 @@ def do_search(args):
 	if not mc.is_authenticated:
 		sys.exit("Failed to authenticate client.")
 
-	search_results = filter_songs(mc.songs(), args.filters)
-	search_results.sort(
+	search_results = natsorted(
+		filter_songs(mc.songs(), args.filters),
 		key=lambda song: (
 			song.get('artist', ''),
 			song.get('album', ''),
@@ -174,15 +175,13 @@ def do_sync_down(args):
 	local_songs = get_local_songs(filepaths, max_depth=args.max_depth)
 
 	logger.info("Comparing song collections")
-	to_download = list(
+	to_download = natsorted(
 		gm_utils.find_missing_items(
 			google_songs,
 			local_songs,
 			fields=['artist', 'album', 'title', 'tracknumber'],
 			normalize_values=True
-		)
-	)
-	to_download.sort(
+		),
 		key=lambda song: (
 			song.get('artist', ''),
 			song.get('album', ''),
@@ -221,7 +220,7 @@ def do_sync_up(args):
 	local_songs = get_local_songs(args.include, filters=args.filters, max_depth=args.max_depth)
 
 	logger.info("Comparing song collections")
-	to_upload = sorted(
+	to_upload = natsorted(
 		gm_utils.find_missing_items(
 			local_songs,
 			google_songs,
@@ -258,8 +257,9 @@ def do_upload(args):
 	if not mm.is_authenticated:
 		sys.exit("Failed to authenticate client.")
 
-	to_upload = get_local_songs(args.include, filters=args.filters, max_depth=args.max_depth)
-	to_upload.sort()
+	to_upload = natsorted(
+		get_local_songs(args.include, filters=args.filters, max_depth=args.max_depth)
+	)
 
 	if not to_upload:
 		logger.info("No songs to upload")
