@@ -31,6 +31,7 @@ setup(
 		'appdirs>=1.4',
 		'audio-metadata>=0.4',
 		'google-music>=3.0',
+		'google-music-proto>=2.4',
 		'google-music-utils>=2.1',
 		'logzero>=1.5',
 		'natsort>=5.2',

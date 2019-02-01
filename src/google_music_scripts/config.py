@@ -26,7 +26,6 @@ COMMAND_KEYS = {
 	'download',
 	'quota',
 	'search',
-	'sync',
 	'up',
 	'upload'
 }
@@ -72,50 +71,20 @@ def get_defaults(command, *, username=None):
 			if k not in COMMAND_KEYS
 		)
 
-		if command[0] in config_defaults:
+		if command in config_defaults:
 			defaults.update(
 				(k, v)
 				for k, v in config_defaults[command[0]].items()
 				if k not in COMMAND_KEYS
 			)
 
-			if len(command) == 2:
-				subcmd_alias = COMMAND_ALIASES.get(command[1], '')
-				if command[1] in config_defaults[command[0]]:
-					defaults.update(
-						(k, v)
-						for k, v in config_defaults[command[0]][command[1]].items()
-						if k not in COMMAND_KEYS
-					)
-				elif subcmd_alias in config_defaults[command[0]]:
-					defaults.update(
-						(k, v)
-						for k, v in config_defaults[command[0]][subcmd_alias].items()
-						if k not in COMMAND_KEYS
-					)
-
-		cmd_alias = COMMAND_ALIASES.get(command[0], '')
+		cmd_alias = COMMAND_ALIASES.get(command)
 		if cmd_alias in config_defaults:
 			defaults.update(
 				(k, v)
 				for k, v in config_defaults[cmd_alias].items()
 				if k not in COMMAND_KEYS
 			)
-
-			if len(command) == 2:
-				subcmd_alias = COMMAND_ALIASES.get(command[1], '')
-				if command[1] in config_defaults[cmd_alias]:
-					defaults.update(
-						(k, v)
-						for k, v in config_defaults[cmd_alias][command[1]].items()
-						if k not in COMMAND_KEYS
-					)
-				elif subcmd_alias in config_defaults[command[0]]:
-					defaults.update(
-						(k, v)
-						for k, v in config_defaults[cmd_alias][subcmd_alias].items()
-						if k not in COMMAND_KEYS
-					)
 
 	return convert_default_keys(defaults)
 

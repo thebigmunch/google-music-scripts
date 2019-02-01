@@ -8,6 +8,13 @@ As of version **2.0.0**, google-music-scripts no longer installs the entry point
 for the legacy commands (``gmupload, gmdownload, etc.``). Use the ``gms`` command
 with subcommands instead.
 
+As of version **4.0.0**, the ``sync`` commands are removed in favor of syncing
+options for the ``download`` and ``upload`` commands. These allow syncing based
+on the hash of the audio data ('clientId' on Google Music) and/or the metadata.
+Both sync options are enabled by default. This adds a dependency on the mobile
+API, so users will have to authenticate the Mobile Client on first run if they
+haven't previously done so through the Mobile API-based commands.
+
 
 Configuration
 -------------

@@ -99,8 +99,6 @@ def filter_songs(songs, filters):
 
 
 def get_local_songs(filepaths, *, filters=None, max_depth=float('inf')):
-	logger.info("Loading local songs")
-
 	local_songs = get_supported_filepaths(filepaths, max_depth=max_depth)
 	matched_songs = filter_songs(local_songs, filters)
 

@@ -10,8 +10,6 @@ from .commands import (
 	do_download,
 	do_quota,
 	do_search,
-	do_sync_down,
-	do_sync_up,
 	do_upload
 )
 from .config import configure_logging, get_defaults
@@ -21,16 +19,14 @@ from .utils import DictMixin, convert_cygwin_path
 FILTER_RE = re.compile(r'(([+-]+)?(.*?)\[(.*?)\])', re.I)
 
 DISPATCH = {
-	('del',): do_delete,
-	('delete',): do_delete,
-	('down',): do_download,
-	('download',): do_download,
-	('quota',): do_quota,
-	('search',): do_search,
-	('sync', 'down'): do_sync_down,
-	('sync', 'up'): do_sync_up,
-	('up',): do_upload,
-	('upload',): do_upload
+	'del': do_delete,
+	'delete': do_delete,
+	'down': do_download,
+	'download': do_download,
+	'quota': do_quota,
+	'search': do_search,
+	'up': do_upload,
+	'upload': do_upload
 }
 
 
@@ -46,7 +42,7 @@ class UsageHelpFormatter(argparse.RawTextHelpFormatter):
 # Removes the command list while leaving the usage metavar intact.
 class SubcommandHelpFormatter(UsageHelpFormatter):
 	def _format_action(self, action):
-		parts = super(argparse.RawDescriptionHelpFormatter, self)._format_action(action)
+		parts = super()._format_action(action)
 		if action.nargs == argparse.PARSER:
 			parts = "\n".join(parts.split("\n")[1:])
 		return parts
@@ -154,21 +150,33 @@ logging_options.add_argument(
 )
 
 
-##########
-# Mobile #
-##########
+##################
+# Identification #
+##################
 
-mobile = argparse.ArgumentParser(
+ident = argparse.ArgumentParser(
 	argument_default=argparse.SUPPRESS,
 	add_help=False
 )
 
-mc_ident_options = mobile.add_argument_group("Identification")
-mc_ident_options.add_argument(
+ident_options = ident.add_argument_group("Identification")
+ident_options.add_argument(
 	'-u', '--username',
 	metavar='USER',
 	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
 )
+
+
+##########
+# Mobile #
+##########
+
+mc_ident = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+mc_ident_options = mc_ident.add_argument_group("Identification")
 mc_ident_options.add_argument(
 	'--device-id',
 	metavar='ID',
@@ -180,17 +188,12 @@ mc_ident_options.add_argument(
 # Music Manager #
 #################
 
-music_manager = argparse.ArgumentParser(
+mm_ident = argparse.ArgumentParser(
 	argument_default=argparse.SUPPRESS,
 	add_help=False
 )
 
-mm_ident_options = music_manager.add_argument_group("Identification")
-mm_ident_options.add_argument(
-	'-u', '--username',
-	metavar='USER',
-	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
-)
+mm_ident_options = mm_ident.add_argument_group("Identification")
 mm_ident_options.add_argument(
 	'--uploader-id',
 	metavar='ID',
@@ -287,6 +290,39 @@ upload_misc_options.add_argument(
 )
 
 
+########
+# Sync #
+########
+
+
+sync = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+sync_options = sync.add_argument_group("Sync")
+sync_options.add_argument(
+	'--use-hash',
+	action='store_true',
+	help="Use audio hash to sync songs."
+)
+sync_options.add_argument(
+	'--no-use-hash',
+	action='store_true',
+	help="Don't use audio hash to sync songs."
+)
+sync_options.add_argument(
+	'--use-metadata',
+	action='store_true',
+	help="Use metadata to sync songs."
+)
+sync_options.add_argument(
+	'--no-use-metadata',
+	action='store_true',
+	help="Don't use metadata to sync songs."
+)
+
+
 ##########
 # Output #
 ##########
@@ -355,7 +391,14 @@ delete_command = subcommands.add_parser(
 	help="Delete song(s) from Google Music.",
 	formatter_class=UsageHelpFormatter,
 	usage="gms delete [OPTIONS]",
-	parents=[meta, logging_, mobile, filter_, yes],
+	parents=[
+		meta,
+		logging_,
+		ident,
+		mc_ident,
+		filter_,
+		yes
+	],
 	add_help=False
 )
 
@@ -371,7 +414,18 @@ download_command = subcommands.add_parser(
 	help="Download song(s) from Google Music.",
 	formatter_class=UsageHelpFormatter,
 	usage="gms download [OPTIONS]",
-	parents=[meta, logging_, music_manager, filter_, output],
+	parents=[
+		meta,
+		logging_,
+		ident,
+		mm_ident,
+		mc_ident,
+		local,
+		filter_,
+		sync,
+		output,
+		include
+	],
 	add_help=False
 )
 
@@ -386,7 +440,12 @@ quota_command = subcommands.add_parser(
 	help="Get the uploaded song count and allowance.",
 	formatter_class=UsageHelpFormatter,
 	usage="gms quota [OPTIONS]",
-	parents=[meta, logging_, music_manager],
+	parents=[
+		meta,
+		logging_,
+		ident,
+		mm_ident
+	],
 	add_help=False
 )
 
@@ -401,49 +460,13 @@ search_command = subcommands.add_parser(
 	help="Search for Google Music library songs.",
 	formatter_class=UsageHelpFormatter,
 	usage="gms search [OPTIONS]",
-	parents=[meta, logging_, mobile, filter_, yes],
-	add_help=False
-)
-
-
-########
-# Sync #
-########
-
-sync_command = subcommands.add_parser(
-	'sync',
-	help="",
-	formatter_class=SubcommandHelpFormatter,
-	usage=argparse.SUPPRESS,
-	parents=[meta],
-	add_help=False
-)
-
-sync_subcommands = sync_command.add_subparsers(
-	title="Commands",
-	dest='_sync_command',
-	metavar="<command>"
-)
-
-sync_subcommands.add_parser(
-	'download',
-	aliases=['down'],
-	description="Sync song(s) from Google Music.",
-	help="Sync song(s) from Google Music.",
-	formatter_class=UsageHelpFormatter,
-	usage="gms sync down [OPTIONS] [INCLUDE_PATH]...",
-	parents=[meta, logging_, music_manager, local, filter_, output, include],
-	add_help=False
-)
-
-sync_subcommands.add_parser(
-	'upload',
-	aliases=['up'],
-	description="Sync song(s) to Google Music.",
-	help="Sync song(s) to Google Music.",
-	formatter_class=UsageHelpFormatter,
-	usage="gms sync up [OPTIONS] [INCLUDE_PATH]...",
-	parents=[meta, logging_, music_manager, local, filter_, upload_misc, include],
+	parents=[
+		meta,
+		logging_,
+		mc_ident,
+		filter_,
+		yes
+	],
 	add_help=False
 )
 
@@ -459,7 +482,18 @@ upload_command = subcommands.add_parser(
 	help="Upload song(s) to Google Music.",
 	formatter_class=UsageHelpFormatter,
 	usage="gms upload [OPTIONS] [INCLUDE_PATH]...",
-	parents=[meta, logging_, music_manager, local, filter_, upload_misc, include],
+	parents=[
+		meta,
+		logging_,
+		ident,
+		mm_ident,
+		mc_ident,
+		local,
+		filter_,
+		upload_misc,
+		sync,
+		include
+	],
 	add_help=False
 )
 
@@ -475,7 +509,28 @@ def set_defaults(args):
 	defaults.username = ''
 	defaults.filters = []
 
-	if args._command in ['down', 'download', 'quota', 'sync', 'up', 'upload']:
+	if args._command in ['down', 'download', 'up', 'upload']:
+		defaults.uploader_id = None
+		defaults.device_id = None
+
+		defaults.no_recursion = False
+		defaults.max_depth = math.inf
+		defaults.include = [custom_path('.').resolve()]
+
+		if 'no_use_hash' in args:
+			defaults.use_hash = False
+			defaults.no_use_hash = True
+		else:
+			defaults.use_hash = True
+			defaults.no_use_hash = False
+
+		if 'no_use_metadata' in args:
+			defaults.use_metadata = False
+			defaults.no_use_metadata = True
+		else:
+			defaults.use_metadata = True
+			defaults.no_use_metadata = False
+	elif args._command in ['quota']:
 		defaults.uploader_id = None
 	else:
 		defaults.device_id = None
@@ -483,25 +538,14 @@ def set_defaults(args):
 	if args._command in ['del', 'delete', 'search']:
 		defaults.yes = False
 
-	if (
-		args._command in ['down', 'download']
-		or args.get('_sync_command') in ['down', 'download']
-	):
+	if args._command in ['down', 'download']:
 		defaults.output = str(Path('.').resolve())
 		defaults.include = [custom_path('.').resolve()]
 
-	if (
-		args._command in ['up', 'upload']
-		or args.get('_sync_command') in ['up', 'upload']
-	):
+	if args._command in ['up', 'upload']:
 		defaults.delete_on_success = False
 		defaults.no_sample = False
 		defaults.album_art = None
-
-	if args._command in ['sync', 'up', 'upload']:
-		defaults.no_recursion = False
-		defaults.max_depth = math.inf
-		defaults.include = [custom_path('.').resolve()]
 
 	config_defaults = get_defaults(args._command, username=args.get('username'))
 	for k, v in config_defaults.items():
@@ -521,6 +565,12 @@ def set_defaults(args):
 				custom_path(val)
 				for val in v
 			]
+		elif k in ['use_hash', 'use_metadata']:
+			defaults[k] = v
+			defaults[f"no_{k}"] = not v
+		elif k in ['no_use_hash', 'no_use_metadata']:
+			defaults[k] = v
+			defaults[f"{k.replace('no_', '')}"] = not v
 		else:
 			defaults[k] = v
 
@@ -530,15 +580,26 @@ def set_defaults(args):
 def run():
 	parsed = gms.parse_args(namespace=Namespace())
 
-	if '_sync_command' in parsed:
-		if parsed._sync_command:
-			command = (parsed._command, parsed._sync_command)
-		else:
-			gms.parse_args(['sync', '-h'])
-	elif parsed.get('_command'):
-		command = (parsed._command,)
+	if parsed.get('_command'):
+		command = parsed._command
 	else:
 		gms.parse_args(['-h'])
+
+	if all(
+		option in parsed
+		for option in ['use_hash', 'no_use_hash']
+	):
+		raise ValueError(
+			"Use one of --use-hash/--no-use-hash', not both."
+		)
+
+	if all(
+		option in parsed
+		for option in ['use_metadata', 'no_use_metadata']
+	):
+		raise ValueError(
+			"Use one of --use-metadata/--no-use-metadata', not both."
+		)
 
 	args = set_defaults(parsed)
 	args.update(parsed)
@@ -551,4 +612,4 @@ def run():
 	try:
 		DISPATCH[command](args)
 	except KeyboardInterrupt:
-		gms.exit(130, "Exiting")
+		gms.exit(130, "Interrupted by user")
