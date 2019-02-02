@@ -54,11 +54,6 @@ and **uploader-id2** for the **upload** command::
 	[defaults.upload]
 	uploader-id = "uploader-id2"
 
-Nested commands work the same::
-
-	[defaults.sync.up]
-	uploader-id = "uploader-id2"
-
 
 Filtering
 ---------
