@@ -33,7 +33,7 @@ setup(
 		'google-music>=3.0',
 		'google-music-proto>=2.4',
 		'google-music-utils>=2.1',
-		'logzero>=1.5',
+		'loguru >=0.2, <0.3',
 		'natsort>=5.2',
 		'tomlkit>=0.5'
 	],

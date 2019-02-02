@@ -3,7 +3,7 @@ import sys
 import google_music
 import google_music_utils as gm_utils
 from google_music_proto.musicmanager.utils import generate_client_id
-from logzero import logger
+from loguru import logger
 from more_itertools import first_true
 from natsort import natsorted
 
@@ -17,7 +17,7 @@ from .utils import template_to_base_path
 
 
 def do_delete(args):
-	logger.info("Logging in to Mobile Client")
+	logger.success("Logging in to Mobile Client")
 	mc = google_music.mobileclient(args.username, device_id=args.device_id)
 	if not mc.is_authenticated:
 		sys.exit("Failed to authenticate Mobile Client")
@@ -25,9 +25,9 @@ def do_delete(args):
 	to_delete = filter_songs(mc.songs(), args.filters)
 
 	if not to_delete:
-		logger.info("No songs to delete")
+		logger.success("No songs to delete")
 	elif args.dry_run:
-		logger.info(f"Found {len(to_delete)} songs to delete")
+		logger.success(f"Found {len(to_delete)} songs to delete")
 
 		for song in to_delete:
 			title = song.get('title', "<empty>")
@@ -35,7 +35,7 @@ def do_delete(args):
 			album = song.get('album', "<empty>")
 			song_id = song['id']
 
-			logger.info(f"{title} -- {artist} -- {album} ({song_id})")
+			logger.success(f"{title} -- {artist} -- {album} ({song_id})")
 	else:
 		confirm = args.yes or input(
 			f"\nAre you sure you want to delete {len(to_delete)} song(s) from Google Music? (y/n) "
@@ -54,25 +54,25 @@ def do_delete(args):
 				album = song.get('album', "<empty>")
 				song_id = song['id']
 
-				logger.debug(f"Deleting {title} -- {artist} -- {album} ({song_id})")
+				logger.info(f"Deleting {title} -- {artist} -- {album} ({song_id})")
 
 				mc.song_delete(song)
 
-				logger.info(f"Deleted {song_num:>{pad}}/{total}")
+				logger.success(f"Deleted {song_num:>{pad}}/{total}")
 		else:
-			logger.info("No songs deleted")
+			logger.success("No songs deleted")
 
 	mc.logout()
-	logger.info("All done!")
+	logger.success("All done!")
 
 
 def do_download(args):
-	logger.info("Logging in to Music Manager")
+	logger.success("Logging in to Music Manager")
 	mm = google_music.musicmanager(args.username, uploader_id=args.uploader_id)
 	if not mm.is_authenticated:
 		sys.exit("Failed to authenticate Music Manager")
 
-	logger.info("Logging in to Mobile Client")
+	logger.success("Logging in to Mobile Client")
 	mc = google_music.mobileclient(args.username, device_id=args.device_id)
 	if not mc.is_authenticated:
 		sys.exit("Failed to authenticate Mobile Client")
@@ -84,7 +84,7 @@ def do_download(args):
 	if args.include:
 		filepaths.extend(args.include)
 
-	logger.info("Loading local songs")
+	logger.success("Loading local songs")
 
 	local_songs = get_local_songs(
 		filepaths,
@@ -96,7 +96,7 @@ def do_download(args):
 	)
 	missing_songs = []
 	if args.use_hash:
-		logger.info("Comparing hashes")
+		logger.success("Comparing hashes")
 
 		existing_songs = []
 		google_client_id_map = {
@@ -114,22 +114,22 @@ def do_download(args):
 			else:
 				existing_songs.append(song)
 
-		logger.info(f"Found {len(existing_songs)} songs already exist by audio hash")
-		if logger.level <= 10:
+		logger.success(f"Found {len(existing_songs)} songs already exist by audio hash")
+		if logger._min_level <= 20:
 			for song in existing_songs:
 				title = song.get('title', "<title>")
 				artist = song.get('artist', "<artist>")
 				album = song.get('album', "<album>")
 				song_id = song['id']
 
-				logger.debug(f"{title} -- {artist} -- {album} ({song_id})")
+				logger.info(f"{title} -- {artist} -- {album} ({song_id})")
 
 	if args.use_metadata:
 		if args.use_hash:
 			google_songs = missing_songs
 
 		if google_songs:
-			logger.info("Comparing metadata")
+			logger.success("Comparing metadata")
 
 			missing_songs = natsorted(
 				gm_utils.find_missing_items(
@@ -149,15 +149,15 @@ def do_download(args):
 				)
 			)
 
-			logger.info(f"Found {len(existing_songs)} songs already exist by metadata")
-			if logger.level <= 10:
+			logger.success(f"Found {len(existing_songs)} songs already exist by metadata")
+			if logger._min_level <= 20:
 				for song in existing_songs:
 					title = song.get('title', "<title>")
 					artist = song.get('artist', "<artist>")
 					album = song.get('album', "<album>")
 					song_id = song['id']
 
-					logger.debug(f"{title} -- {artist} -- {album} ({song_id})")
+					logger.info(f"{title} -- {artist} -- {album} ({song_id})")
 
 	if not args.use_hash and not args.use_metadata:
 		missing_songs = google_songs
@@ -165,38 +165,38 @@ def do_download(args):
 	to_download = natsorted(missing_songs)
 
 	if not to_download:
-		logger.info("No songs to download")
+		logger.success("No songs to download")
 	elif args.dry_run:
-		logger.info(f"Found {len(to_download)} songs to download")
+		logger.success(f"Found {len(to_download)} songs to download")
 
-		if logger.level <= 10:
+		if logger._min_level <= 20:
 			for song in to_download:
 				title = song.get('title', "<title>")
 				artist = song.get('artist', "<artist>")
 				album = song.get('album', "<album>")
 				song_id = song['id']
 
-				logger.debug(f"{title} -- {artist} -- {album} ({song_id})")
+				logger.info(f"{title} -- {artist} -- {album} ({song_id})")
 	else:
 		download_songs(mm, to_download, template=args.output)
 
 	mm.logout()
-	logger.info("All done!")
+	logger.success("All done!")
 
 
 def do_quota(args):
-	logger.info("Logging in to Music Manager")
+	logger.success("Logging in to Music Manager")
 	mm = google_music.musicmanager(args.username, uploader_id=args.uploader_id)
 	if not mm.is_authenticated:
 		sys.exit("Failed to authenticate Music Manager")
 
 	uploaded, allowed = mm.quota()
 
-	logger.info(f"Quota -- {uploaded}/{allowed} ({uploaded / allowed:.2%})")
+	logger.success(f"Quota -- {uploaded}/{allowed} ({uploaded / allowed:.2%})")
 
 
 def do_search(args):
-	logger.info("Logging in to Mobile Client")
+	logger.success("Logging in to Mobile Client")
 	mc = google_music.mobileclient(args.username, device_id=args.device_id)
 	if not mc.is_authenticated:
 		sys.exit("Failed to authenticate Mobile Client")
@@ -229,32 +229,32 @@ def do_search(args):
 				album = result.get('album', "<empty>")
 				song_id = result['id']
 
-				logger.info(
+				logger.success(
 					f"{result_num:>{pad}}/{total} {title} -- {artist} -- {album} ({song_id})"
 				)
 	else:
-		logger.info("No songs found matching query")
+		logger.success("No songs found matching query")
 
 	mc.logout()
-	logger.info("All done!")
+	logger.success("All done!")
 
 
 def do_upload(args):
-	logger.info("Logging in to Music Manager")
+	logger.success("Logging in to Music Manager")
 	mm = google_music.musicmanager(args.username, uploader_id=args.uploader_id)
 	if not mm.is_authenticated:
 		sys.exit("Failed to authenticate Music Manager")
 
-	logger.info("Logging in to Mobile Client")
+	logger.success("Logging in to Mobile Client")
 	mc = google_music.mobileclient(args.username, device_id=args.device_id)
 	if not mc.is_authenticated:
 		sys.exit("Failed to authenticate Mobile Client")
 
-	logger.info("Loading local songs")
+	logger.success("Loading local songs")
 
 	missing_songs = []
 	if args.use_hash:
-		logger.info("Comparing hashes")
+		logger.success("Comparing hashes")
 
 		existing_songs = []
 		google_client_ids = {song.get('clientId', '') for song in mc.songs()}
@@ -271,10 +271,10 @@ def do_upload(args):
 			else:
 				existing_songs.append(song)
 
-		logger.info(f"Found {len(existing_songs)} songs already exist by audio hash")
-		if logger.level <= 10:
+		logger.success(f"Found {len(existing_songs)} songs already exist by audio hash")
+		if logger._min_level <= 20:
 			for song in natsorted(existing_songs):
-				logger.debug(song)
+				logger.info(song)
 
 	if args.use_metadata:
 		if args.use_hash:
@@ -290,7 +290,7 @@ def do_upload(args):
 			)
 
 		if local_songs:
-			logger.info("Comparing metadata")
+			logger.success("Comparing metadata")
 
 			google_songs = mm.songs()
 
@@ -312,10 +312,10 @@ def do_upload(args):
 				)
 			)
 
-			logger.info(f"Found {len(existing_songs)} songs already exist by metadata")
-			if logger.level <= 10:
+			logger.success(f"Found {len(existing_songs)} songs already exist by metadata")
+			if logger._min_level <= 20:
 				for song in existing_songs:
-					logger.debug(song)
+					logger.info(song)
 
 	if not args.use_hash and not args.use_metadata:
 		missing_songs = get_local_songs(
@@ -330,13 +330,13 @@ def do_upload(args):
 	to_upload = natsorted(local_songs)
 
 	if not to_upload:
-		logger.info("No songs to upload")
+		logger.success("No songs to upload")
 	elif args.dry_run:
-		logger.info(f"Found {len(to_upload)} songs to upload")
+		logger.success(f"Found {len(to_upload)} songs to upload")
 
-		if logger.level <= 10:
+		if logger._min_level <= 20:
 			for song in to_upload:
-				logger.debug(song)
+				logger.info(song)
 	else:
 		upload_songs(
 			mm,
@@ -348,4 +348,4 @@ def do_upload(args):
 
 	mc.logout()
 	mm.logout()
-	logger.info("All done!")
+	logger.success("All done!")

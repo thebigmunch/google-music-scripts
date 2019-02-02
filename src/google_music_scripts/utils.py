@@ -12,7 +12,7 @@ from pathlib import Path
 
 import google_music_utils as gm_utils
 import pprintpp
-from logzero import logger
+from loguru import logger
 
 
 class DictMixin(MutableMapping):

@@ -5,13 +5,13 @@ from pathlib import Path
 
 import audio_metadata
 import google_music_utils as gm_utils
-from logzero import logger
+from loguru import logger
 
 from .utils import get_album_art_path
 
 
 def download_songs(mm, songs, template=None):
-	logger.info(f"Downloading {len(songs)} songs from Google Music")
+	logger.success(f"Downloading {len(songs)} songs from Google Music")
 
 	if not template:
 		template = Path.cwd()
@@ -26,9 +26,9 @@ def download_songs(mm, songs, template=None):
 		try:
 			audio, _ = mm.download(song)
 		except Exception as e:  # TODO: More specific exception.
-			logger.info(
-				f"({songnum:>{pad}}/{total}) Failed -- {song} | {e}",
-				extra={'success': False}
+			logger.log(
+				'FAILURE',
+				f"({songnum:>{pad}}/{total}) Failed -- {song} | {e}"
 			)
 		else:
 			tags = audio_metadata.loads(audio).tags
@@ -41,15 +41,14 @@ def download_songs(mm, songs, template=None):
 			filepath.touch()
 			filepath.write_bytes(audio)
 
-			logger.info(
-				f"({songnum:>{pad}}/{total}) Downloaded -- {filepath} ({song['id']})",
-				extra={'success': True}
+			logger.success(
+				f"({songnum:>{pad}}/{total}) Downloaded -- {filepath} ({song['id']})"
 			)
 
 
 def filter_songs(songs, filters):
 	if filters:
-		logger.info("Filtering songs")
+		logger.success("Filtering songs")
 
 		matched_songs = []
 
@@ -165,7 +164,7 @@ def upload_songs(
 	no_sample=False,
 	delete_on_success=False
 ):
-	logger.info(f"Uploading {len(filepaths)} songs to Google Music")
+	logger.success(f"Uploading {len(filepaths)} songs to Google Music")
 
 	filenum = 0
 	total = len(filepaths)
@@ -183,25 +182,22 @@ def upload_songs(
 		)
 
 		if result['reason'] == 'Uploaded':
-			logger.info(
-				f"({filenum:>{pad}}/{total}) Uploaded -- {result['filepath']} ({result['song_id']})",
-				extra={'success': True}
+			logger.success(
+				f"({filenum:>{pad}}/{total}) Uploaded -- {result['filepath']} ({result['song_id']})"
 			)
 		elif result['reason'] == 'Matched':
-			logger.info(
-				f"({filenum:>{pad}}/{total}) Matched -- {result['filepath']} ({result['song_id']})",
-				extra={'success': True}
+			logger.success(
+				f"({filenum:>{pad}}/{total}) Matched -- {result['filepath']} ({result['song_id']})"
 			)
 		else:
 			if 'song_id' in result:
-				logger.info(
-					f"({filenum:>{pad}}/{total}) Already exists -- {result['filepath']} ({result['song_id']})",
-					extra={'success': True}
+				logger.success(
+					f"({filenum:>{pad}}/{total}) Already exists -- {result['filepath']} ({result['song_id']})"
 				)
 			else:
-				logger.info(
-					f"({filenum:>{pad}}/{total}) Failed -- {result['filepath']} | {result['reason']}",
-					extra={'success': False}
+				logger.log(
+					'FAILURE'
+					f"({filenum:>{pad}}/{total}) Failed -- {result['filepath']} | {result['reason']}"
 				)
 
 		if delete_on_success and 'song_id' in result:

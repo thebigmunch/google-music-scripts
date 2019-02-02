@@ -631,7 +631,11 @@ def run():
 	if args.get('no_recursion'):
 		args.max_depth = 0
 
-	configure_logging(args.verbose - args.quiet, args.username, log_to_file=args.log)
+	configure_logging(
+		args.verbose - args.quiet,
+		username=args.username,
+		log_to_file=args.log
+	)
 
 	try:
 		DISPATCH[command](args)
