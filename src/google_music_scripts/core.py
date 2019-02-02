@@ -148,7 +148,7 @@ def get_local_songs(
 		elif filepath.is_file():
 			with filepath.open('rb') as f:
 				if audio_metadata.determine_format(
-					f.read(4), extension=path.suffix
+					f.read(4), extension=filepath.suffix
 				) is not None:
 					local_songs.append(filepath)
 
