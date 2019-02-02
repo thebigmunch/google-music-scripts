@@ -1,3 +1,5 @@
+import math
+import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -5,7 +7,7 @@ import audio_metadata
 import google_music_utils as gm_utils
 from logzero import logger
 
-from .utils import get_album_art_path, get_supported_filepaths
+from .utils import get_album_art_path
 
 
 def download_songs(mm, songs, template=None):
@@ -98,8 +100,59 @@ def filter_songs(songs, filters):
 	return matched_songs
 
 
-def get_local_songs(filepaths, *, filters=None, max_depth=float('inf')):
-	local_songs = get_supported_filepaths(filepaths, max_depth=max_depth)
+def get_local_songs(
+	filepaths,
+	*,
+	filters=None,
+	max_depth=math.inf,
+	exclude_paths=None,
+	exclude_regexes=None,
+	exclude_globs=None
+):
+	def _exclude_paths(path, exclude_paths):
+		return any(
+			str(Path(exclude_path)) in str(path)
+			for exclude_path in exclude_paths
+		)
+
+	def _exclude_regexes(path, exclude_regexes):
+		return any(
+			re.search(regex, str(path))
+			for regex in exclude_regexes
+		)
+
+	local_songs = []
+	for filepath in filepaths:
+		if (
+			_exclude_paths(filepath, exclude_paths)
+			or _exclude_regexes(filepath, exclude_regexes)
+		):
+			continue
+
+		if filepath.is_dir():
+			exclude_files = set()
+			for exclude_glob in exclude_globs:
+				exclude_files |= set(filepath.rglob(exclude_glob))
+
+			for path in filepath.glob('**/*'):
+				if (
+					path.is_file()
+					and path not in exclude_files
+					and not _exclude_paths(path, exclude_paths)
+					and not _exclude_regexes(path, exclude_regexes)
+				):
+					with path.open('rb') as f:
+						if audio_metadata.determine_format(
+							f.read(4), extension=path.suffix
+						) is not None:
+							local_songs.append(path)
+		elif filepath.is_file():
+			with filepath.open('rb') as f:
+				if audio_metadata.determine_format(
+					f.read(4), extension=path.suffix
+				) is not None:
+					local_songs.append(filepath)
+
 	matched_songs = filter_songs(local_songs, filters)
 
 	return matched_songs

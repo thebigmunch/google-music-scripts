@@ -90,6 +90,10 @@ def do_download(args):
 		filepaths,
 		filters=args.filters,
 		max_depth=args.max_depth,
+		exclude_paths=args.exclude_paths,
+		exclude_regexes=args.exclude_regexes,
+		exclude_globs=args.exclude_globs
+	)
 	missing_songs = []
 	if args.use_hash:
 		logger.info("Comparing hashes")
@@ -257,7 +261,10 @@ def do_upload(args):
 		for song in get_local_songs(
 			args.include,
 			filters=args.filters,
-			max_depth=args.max_depth
+			max_depth=args.max_depth,
+			exclude_paths=args.exclude_paths,
+			exclude_regexes=args.exclude_regexes,
+			exclude_globs=args.exclude_globs
 		):
 			if generate_client_id(song) not in google_client_ids:
 				missing_songs.append(song)
@@ -276,7 +283,10 @@ def do_upload(args):
 			local_songs = get_local_songs(
 				args.include,
 				filters=args.filters,
-				max_depth=args.max_depth
+				max_depth=args.max_depth,
+				exclude_paths=args.exclude_paths,
+				exclude_regexes=args.exclude_regexes,
+				exclude_globs=args.exclude_globs
 			)
 
 		if local_songs:
@@ -311,7 +321,10 @@ def do_upload(args):
 		missing_songs = get_local_songs(
 			args.include,
 			filters=args.filters,
-			max_depth=args.max_depth
+			max_depth=args.max_depth,
+			exclude_paths=args.exclude_paths,
+			exclude_regexes=args.exclude_regexes,
+			exclude_globs=args.exclude_globs
 		)
 
 	to_upload = natsorted(local_songs)

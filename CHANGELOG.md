@@ -15,6 +15,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
   ``download`` and ``upload`` commands.
 * ``--use-metadata/--no-use-metadata`` option to
   ``download`` and ``upload`` commands.
+* Options to exclude local filepaths in different ways:
+  * ``-xp, --exclude-path``
+  * ``-xr, --exclude-regex``
+  * ``-xg, --exclude-glob``
 
 ### Changed
 

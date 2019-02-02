@@ -222,6 +222,27 @@ local_options.add_argument(
 	type=int,
 	help="Set maximum depth of recursion when scanning for local files.\nDefault is infinite recursion."
 )
+local_options.add_argument(
+	'-xp', '--exclude-path',
+	metavar='PATH',
+	action='append',
+	dest='exclude_paths',
+	help="Exclude filepaths.\nCan be specified multiple times."
+)
+local_options.add_argument(
+	'-xr', '--exclude-regex',
+	metavar='RX',
+	action='append',
+	dest='exclude_regexes',
+	help="Exclude filepaths using regular expressions.\nCan be specified multiple times."
+)
+local_options.add_argument(
+	'-xg', '--exclude-glob',
+	metavar='GP',
+	action='append',
+	dest='exclude_globs',
+	help="Exclude filepaths using glob patterns.\nCan be specified multiple times.\nAbsolute glob patterns not supported."
+)
 
 
 ##########
@@ -240,7 +261,7 @@ filter_options.add_argument(
 	action='append',
 	dest='filters',
 	type=parse_filter,
-	help="Metadata filters."
+	help="Metadata filters.\nCan be specified multiple times."
 )
 
 
@@ -515,6 +536,9 @@ def set_defaults(args):
 
 		defaults.no_recursion = False
 		defaults.max_depth = math.inf
+		defaults.exclude_paths = []
+		defaults.exclude_regexes = []
+		defaults.exclude_globs = []
 		defaults.include = [custom_path('.').resolve()]
 
 		if 'no_use_hash' in args:

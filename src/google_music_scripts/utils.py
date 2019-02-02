@@ -2,7 +2,6 @@ __all__ = [
 	'DictMixin',
 	'convert_cygwin_path',
 	'get_album_art_path',
-	'get_supported_filepaths',
 	'template_to_base_path'
 ]
 
@@ -11,7 +10,6 @@ import subprocess
 from collections.abc import MutableMapping
 from pathlib import Path
 
-import audio_metadata
 import google_music_utils as gm_utils
 import pprintpp
 from logzero import logger
@@ -109,43 +107,6 @@ def get_album_art_path(song, album_art_paths):
 					break
 
 	return album_art_path
-
-
-def get_supported_filepaths(filepaths, max_depth=float('inf')):
-	"""Get supported audio files from given filepaths.
-
-	Parameters:
-		filepaths (list): Filepath(s) to check.
-
-		max_depth (int): The depth in the directory tree to walk.
-			A depth of '0' limits the walk to the top directory.
-			Default: No limit.
-
-	Returns:
-		list: A list of filepaths with supported extensions.
-	"""
-
-	supported_filepaths = []
-
-	for filepath in filepaths:
-		path = Path(filepath)
-
-		if path.is_dir():
-			for p in path.glob('**/*'):
-				if p.is_file():
-					with p.open('rb') as f:
-						if audio_metadata.determine_format(
-							f.read(4), extension=p.suffix
-						) is not None:
-							supported_filepaths.append(p)
-		elif path.is_file():
-			with path.open('rb') as f:
-				if audio_metadata.determine_format(
-					f.read(4), extension=path.suffix
-				) is not None:
-					supported_filepaths.append(path)
-
-	return supported_filepaths
 
 
 def template_to_base_path(template, google_songs):
