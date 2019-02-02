@@ -180,6 +180,7 @@ def do_download(args):
 	else:
 		download_songs(mm, to_download, template=args.output)
 
+	mc.logout()
 	mm.logout()
 	logger.success("All done!")
 
@@ -252,20 +253,22 @@ def do_upload(args):
 
 	logger.success("Loading local songs")
 
+	local_songs = get_local_songs(
+		args.include,
+		filters=args.filters,
+		max_depth=args.max_depth,
+		exclude_paths=args.exclude_paths,
+		exclude_regexes=args.exclude_regexes,
+		exclude_globs=args.exclude_globs
+	)
+
 	missing_songs = []
 	if args.use_hash:
 		logger.success("Comparing hashes")
 
 		existing_songs = []
 		google_client_ids = {song.get('clientId', '') for song in mc.songs()}
-		for song in get_local_songs(
-			args.include,
-			filters=args.filters,
-			max_depth=args.max_depth,
-			exclude_paths=args.exclude_paths,
-			exclude_regexes=args.exclude_regexes,
-			exclude_globs=args.exclude_globs
-		):
+		for song in local_songs:
 			if generate_client_id(song) not in google_client_ids:
 				missing_songs.append(song)
 			else:
@@ -279,15 +282,6 @@ def do_upload(args):
 	if args.use_metadata:
 		if args.use_hash:
 			local_songs = missing_songs
-		else:
-			local_songs = get_local_songs(
-				args.include,
-				filters=args.filters,
-				max_depth=args.max_depth,
-				exclude_paths=args.exclude_paths,
-				exclude_regexes=args.exclude_regexes,
-				exclude_globs=args.exclude_globs
-			)
 
 		if local_songs:
 			logger.success("Comparing metadata")
@@ -318,16 +312,9 @@ def do_upload(args):
 					logger.info(song)
 
 	if not args.use_hash and not args.use_metadata:
-		missing_songs = get_local_songs(
-			args.include,
-			filters=args.filters,
-			max_depth=args.max_depth,
-			exclude_paths=args.exclude_paths,
-			exclude_regexes=args.exclude_regexes,
-			exclude_globs=args.exclude_globs
-		)
+		missing_songs = local_songs
 
-	to_upload = natsorted(local_songs)
+	to_upload = natsorted(missing_songs)
 
 	if not to_upload:
 		logger.success("No songs to upload")
