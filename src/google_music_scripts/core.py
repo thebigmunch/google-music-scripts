@@ -1,10 +1,12 @@
 import math
+import platform
 import re
 from collections import defaultdict
 from pathlib import Path
 
 import audio_metadata
 import google_music_utils as gm_utils
+import pendulum
 from loguru import logger
 
 from .utils import get_album_art_path
@@ -46,7 +48,119 @@ def download_songs(mm, songs, template=None):
 			)
 
 
-def filter_songs(songs, filters):
+def filter_google_dates(
+	songs,
+	*,
+	created_in=None,
+	created_on=None,
+	created_before=None,
+	created_after=None,
+	modified_in=None,
+	modified_on=None,
+	modified_before=None,
+	modified_after=None
+):
+
+	matched_songs = songs
+
+	def _dt_from_gm_timestamp(gm_timestamp):
+		return pendulum.from_timestamp(int(gm_timestamp) // 1000000)
+
+	def _match_created_date(songs, period):
+		return (
+			song
+			for song in songs
+			if _dt_from_gm_timestamp(song['creationTimestamp']) in period
+		)
+
+	def _match_modified_date(songs, period):
+		return (
+			song
+			for song in songs
+			if _dt_from_gm_timestamp(song['lastModifiedTimestamp']) in period
+		)
+
+	for period in [
+		created_in,
+		created_on,
+		created_before,
+		created_after
+	]:
+		if period is not None:
+			matched_songs = _match_created_date(matched_songs, period, )
+
+	for period in [
+		modified_in,
+		modified_on,
+		modified_before,
+		modified_after
+	]:
+		if period is not None:
+			matched_songs = _match_modified_date(matched_songs, period)
+
+	return list(matched_songs)
+
+
+def filter_local_dates(
+	filepaths,
+	*,
+	created_in=None,
+	created_on=None,
+	created_before=None,
+	created_after=None,
+	modified_in=None,
+	modified_on=None,
+	modified_before=None,
+	modified_after=None
+):
+	matched_filepaths = filepaths
+
+	def _match_created_date(filepaths, period):
+		for filepath in filepaths:
+			file_stat = filepath.stat()
+
+			if platform.system() == 'Windows':
+				created_timestamp = file_stat.st_ctime
+			else:
+				try:
+					created_timestamp = file_stat.st_birthtime
+				except AttributeError:
+					# Settle for modified time on *nix systems
+					# not supporting birth time.
+					created_timestamp = file_stat.st_mtime
+
+			if pendulum.from_timestamp(created_timestamp) in period:
+				yield filepath
+
+	def _match_modified_date(filepaths, period):
+		for filepath in filepaths:
+			modified_timestamp = filepath.stat().st_mtime
+
+			if pendulum.from_timestamp(modified_timestamp) in period:
+				yield filepath
+
+	for period in [
+		created_in,
+		created_on,
+		created_before,
+		created_after
+	]:
+		if period is not None:
+			matched_filepaths = _match_created_date(matched_filepaths, period)
+
+	for period in [
+		modified_in,
+		modified_on,
+		modified_before,
+		modified_after
+	]:
+		if period is not None:
+			matched_filepaths = _match_modified_date(matched_filepaths, period)
+
+	return list(matched_filepaths)
+
+
+def filter_metadata(songs, filters):
 	if filters:
 		logger.success("Filtering songs")
 
@@ -97,6 +211,10 @@ def filter_songs(songs, filters):
 		matched_songs = songs
 
 	return matched_songs
+
+
+def get_google_songs(client, *, filters=None):
+	return filter_metadata(client.songs(), filters)
 
 
 def get_local_songs(
@@ -152,7 +270,7 @@ def get_local_songs(
 				) is not None:
 					local_songs.append(filepath)
 
-	matched_songs = filter_songs(local_songs, filters)
+	matched_songs = filter_metadata(local_songs, filters)
 
 	return matched_songs
 

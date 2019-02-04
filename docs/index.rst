@@ -58,7 +58,10 @@ and **uploader-id2** for the **upload** command::
 Filtering
 ---------
 
-A number of ``gms`` commands allow filtering results based on song metadata (``-f, --filter``).
+Metadata
+^^^^^^^^
+
+Some ``gms`` commands allow filtering results based on song metadata (``-f, --filter``).
 The syntax is as follows:
 
 	* ``+field[value]`` to include filter condition.
@@ -75,6 +78,35 @@ E.g:
 	* ``gms download -f 'artist[Beck]+album[Guero]-title[E-Pro]' -f 'artist[Daft Punk]'``
 	  would download all songs by Beck from the album Guero without E-Pro in the title
 	  as well as all songs by Daft Punk.
+
+Dates
+^^^^^
+
+Some ``gms`` commands allow filtering results based on creation/modification times.
+The following options are available:
+
+	* ``--created-in``/``--modified-in`` to include results from year or year/month.
+	* ``--created-on``/``--modified-on`` to include results from date.
+	* ``--created-before``/``--modified-before`` to include results from before datetime.
+	* ``--created-after``/``--modified-after`` to include results from after datetime.
+
+
+The format supported follows ISO 8061 with the abilility to use partial datetimes.
+A regex test is found
+`here <http://www.pyregex.com/?id=eyJyZWdleCI6Iig%2FUDx5ZWFyPlxcZHs0fSlbLVxcc10%2FKD9QPG1vbnRoPlxcZHsxLDJ9KT9bLVxcc10%2FKD9QPGRheT5cXGR7MSwyfSk%2FW1RcXHNdPyg%2FUDxob3VyPlxcZHsxLDJ9KT9bOlxcc10%2FKD9QPG1pbnV0ZT5cXGR7MSwyfSk%2FWzpcXHNdPyg%2FUDxzZWNvbmQ%2BXFxkezEsMn0pPyg%2FUDx0el9vcGVyPlsrXFwtXFxzXSk%2FKD9QPHR6X2hvdXI%2BXFxkezEsMn0pP1s6XFxzXT8oP1A8dHpfbWludXRlPlxcZHsxLDJ9KT8iLCJmbGFncyI6MCwibWF0Y2hfdHlwZSI6Im1hdGNoIiwidGVzdF9zdHJpbmciOiIyMDE5LTAyLTA0VDEyOjU5OjU5LTA1MDAifQ%3D%3D>`_.
+
+E.g:
+	* ``gms upload --created-in 2019`` would upload files created in 2019.
+	* ``gms upload --created-in 2019-02`` would upload files created in February 2019.
+	* ``gms download --created-on 2019-02-04`` would download songs uploaded to
+	  Google Music on February 4th, 2019.
+	* ``gms download --created-before 2019`` would download songs uploaded to
+	  Google Music before 2019 (i.e. 2018 or earlier).
+	* ``gms download --created-after '2019-02-04 12:00:00`` would download songs
+	  uploaded to Google Music after 12 noon (UTC) on February 4th, 2019.
+	* ``gms delete --created-after '2019-02-04 12:00:00-05:00`` would delete
+	  songs uploaded to Google Music after 12 noon (GMT-5:00) on February 4th, 2019.
+
 
 
 Transcoding - ffmpeg/avconv

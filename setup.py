@@ -35,6 +35,7 @@ setup(
 		'google-music-utils>=2.1',
 		'loguru >=0.2, <0.3',
 		'natsort>=5.2',
+		'pendulum>=2.0',
 		'tomlkit>=0.5'
 	],
 

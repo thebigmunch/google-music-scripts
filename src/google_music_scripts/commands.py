@@ -9,7 +9,9 @@ from natsort import natsorted
 
 from .core import (
 	download_songs,
-	filter_songs,
+	filter_google_dates,
+	filter_local_dates,
+	get_google_songs,
 	get_local_songs,
 	upload_songs
 )
@@ -22,7 +24,17 @@ def do_delete(args):
 	if not mc.is_authenticated:
 		sys.exit("Failed to authenticate Mobile Client")
 
-	to_delete = filter_songs(mc.songs(), args.filters)
+	to_delete = filter_google_dates(
+		get_google_songs(mc, filters=args.filters),
+		created_in=args.get('created_in'),
+		created_on=args.get('created_on'),
+		created_before=args.get('created_before'),
+		created_after=args.get('created_after'),
+		modified_in=args.get('modified_in'),
+		modified_on=args.get('modified_on'),
+		modified_before=args.get('modified_before'),
+		modified_after=args.get('modified_after')
+	)
 
 	if not to_delete:
 		logger.success("No songs to delete")
@@ -77,12 +89,39 @@ def do_download(args):
 	if not mc.is_authenticated:
 		sys.exit("Failed to authenticate Mobile Client")
 
-	google_songs = filter_songs(mm.songs(), args.filters)
+	logger.success("Loading Google songs")
 
+	google_songs = get_google_songs(mm, filters=args.filters)
 	base_path = template_to_base_path(args.output, google_songs)
 	filepaths = [base_path]
 	if args.include:
 		filepaths.extend(args.include)
+
+	mc_songs = get_google_songs(mc, filters=args.filters)
+	if any(
+		args.get(option)
+		for option in [
+			'created_in',
+			'created_on',
+			'created_before',
+			'created_after',
+			'modified_in',
+			'modified_on',
+			'modified_before',
+			'modified_after'
+		]
+	):
+		mc_songs = filter_google_dates(
+			mc_songs,
+			created_in=args.get('created_in'),
+			created_on=args.get('created_on'),
+			created_before=args.get('created_before'),
+			created_after=args.get('created_after'),
+			modified_in=args.get('modified_in'),
+			modified_on=args.get('modified_on'),
+			modified_before=args.get('modified_before'),
+			modified_after=args.get('modified_after')
+		)
 
 	logger.success("Loading local songs")
 
@@ -94,6 +133,7 @@ def do_download(args):
 		exclude_regexes=args.exclude_regexes,
 		exclude_globs=args.exclude_globs
 	)
+
 	missing_songs = []
 	if args.use_hash:
 		logger.success("Comparing hashes")
@@ -101,7 +141,7 @@ def do_download(args):
 		existing_songs = []
 		google_client_id_map = {
 			song.get('clientId'): song
-			for song in filter_songs(mc.songs(), args.filters)
+			for song in mc_songs
 		}
 		local_client_ids = {generate_client_id(song) for song in local_songs}
 		for client_id, mc_song in google_client_id_map.items():
@@ -202,8 +242,35 @@ def do_search(args):
 	if not mc.is_authenticated:
 		sys.exit("Failed to authenticate Mobile Client")
 
+	search_results = get_google_songs(mc, filters=args.filters)
+
+	if any(
+		args.get(option)
+		for option in [
+			'created_in',
+			'created_on',
+			'created_before',
+			'created_after',
+			'modified_in',
+			'modified_on',
+			'modified_before',
+			'modified_after'
+		]
+	):
+		search_results = filter_google_dates(
+			search_results,
+			created_in=args.get('created_in'),
+			created_on=args.get('created_on'),
+			created_before=args.get('created_before'),
+			created_after=args.get('created_after'),
+			modified_in=args.get('modified_in'),
+			modified_on=args.get('modified_on'),
+			modified_before=args.get('modified_before'),
+			modified_after=args.get('modified_after')
+		),
+
 	search_results = natsorted(
-		filter_songs(mc.songs(), args.filters),
+		search_results,
 		key=lambda song: (
 			song.get('artist', ''),
 			song.get('album', ''),
@@ -262,12 +329,37 @@ def do_upload(args):
 		exclude_globs=args.exclude_globs
 	)
 
+	if any(
+		args.get(option)
+		for option in [
+			'created_in',
+			'created_on',
+			'created_before',
+			'created_after',
+			'modified_in',
+			'modified_on',
+			'modified_before',
+			'modified_after'
+		]
+	):
+		local_songs = filter_local_dates(
+			local_songs,
+			created_in=args.get('created_in'),
+			created_on=args.get('created_on'),
+			created_before=args.get('created_before'),
+			created_after=args.get('created_after'),
+			modified_in=args.get('modified_in'),
+			modified_on=args.get('modified_on'),
+			modified_before=args.get('modified_before'),
+			modified_after=args.get('modified_after')
+		)
+
 	missing_songs = []
 	if args.use_hash:
 		logger.success("Comparing hashes")
 
 		existing_songs = []
-		google_client_ids = {song.get('clientId', '') for song in mc.songs()}
+		google_client_ids = {song.get('clientId', '') for song in get_google_songs(mc)}
 		for song in local_songs:
 			if generate_client_id(song) not in google_client_ids:
 				missing_songs.append(song)
@@ -286,7 +378,7 @@ def do_upload(args):
 		if local_songs:
 			logger.success("Comparing metadata")
 
-			google_songs = mm.songs()
+			google_songs = get_google_songs(mm, filters=args.filters)
 
 			missing_songs = natsorted(
 				gm_utils.find_missing_items(

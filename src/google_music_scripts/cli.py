@@ -4,6 +4,11 @@ import os
 import re
 from pathlib import Path
 
+import pendulum
+from attr import attrib, attrs
+from pendulum import DateTime
+from pendulum.tz import fixed_timezone
+
 from .__about__ import __title__, __version__
 from .commands import (
 	do_delete,
@@ -16,6 +21,23 @@ from .config import configure_logging, get_defaults
 from .constants import UNIX_PATH_RE
 from .utils import DictMixin, convert_cygwin_path
 
+DATETIME_RE = re.compile(
+	r"(?P<year>\d{4})"
+	r"[-\s]?"
+	r"(?P<month>\d{1,2})?"
+	r"[-\s]?"
+	r"(?P<day>\d{1,2})?"
+	r"[T\s]?"
+	r"(?P<hour>\d{1,2})?"
+	r"[:\s]?"
+	r"(?P<minute>\d{1,2})?"
+	r"[:\s]?"
+	r"(?P<second>\d{1,2})?"
+	r"(?P<tz_oper>[+\-\s])?"
+	r"(?P<tz_hour>\d{1,2})?"
+	r"[:\s]?"
+	r"(?P<tz_minute>\d{1,2})?"
+)
 FILTER_RE = re.compile(r'(([+-]+)?(.*?)\[(.*?)\])', re.I)
 
 DISPATCH = {
@@ -28,6 +50,26 @@ DISPATCH = {
 	'up': do_upload,
 	'upload': do_upload
 }
+
+
+def _convert_to_int(value):
+	if value is not None:
+		value = int(value)
+
+	return value
+
+
+@attrs(slots=True, frozen=True, kw_only=True)
+class ParsedDateTime:
+	year = attrib(converter=_convert_to_int)
+	month = attrib(converter=_convert_to_int)
+	day = attrib(converter=_convert_to_int)
+	hour = attrib(converter=_convert_to_int)
+	minute = attrib(converter=_convert_to_int)
+	second = attrib(converter=_convert_to_int)
+	tz_oper = attrib()
+	tz_hour = attrib(converter=_convert_to_int)
+	tz_minute = attrib(converter=_convert_to_int)
 
 
 class Namespace(DictMixin):
@@ -95,6 +137,137 @@ def split_album_art_paths(value):
 				paths.append(Path(val))
 
 	return paths
+
+
+def time_period(
+	dt_string,
+	*,
+	in_=False,
+	on=False,
+	before=False,
+	after=False
+):
+	match = DATETIME_RE.match(dt_string)
+
+	if not match or match['year'] is None:
+		raise argparse.ArgumentTypeError(f"'{dt_string}' is not a supported datetime string.")
+
+	parsed = ParsedDateTime(**match.groupdict())
+
+	if parsed.tz_hour:
+		tz_offset = 0
+		if parsed.tz_hour is not None:
+			tz_offset += parsed.tz_hour * 3600
+		if parsed.tz_minute is not None:
+			tz_offset += parsed.tz_minute * 60
+		if parsed.tz_oper == '-':
+			tz_offset *= -1
+		parsed_tz = fixed_timezone(tz_offset)
+	else:
+		parsed_tz = pendulum.local_timezone()
+
+	if in_:
+		if parsed.day:
+			raise argparse.ArgumentTypeError(
+				f"Datetime string must contain only year or year/month for 'in' option."
+			)
+		start = pendulum.datetime(
+			parsed.year,
+			parsed.month or 1,
+			parsed.day or 1,
+			tz=parsed_tz
+		)
+
+		if parsed.month:
+			end = start.end_of('month')
+		else:
+			end = start.end_of('year')
+
+		return pendulum.period(
+			start,
+			end
+		)
+	elif on:
+		if (
+			not all(
+				getattr(parsed, attr)
+				for attr in ['year', 'month', 'day']
+			)
+			or parsed.hour
+		):
+			raise argparse.ArgumentTypeError(
+				f"Datetime string must contain only year, month, and day for 'on' option."
+			)
+
+		dt = pendulum.datetime(
+			parsed.year,
+			parsed.month,
+			parsed.day,
+			tz=parsed_tz
+		)
+
+		return pendulum.period(
+			dt.start_of('day'),
+			dt.end_of('day')
+		)
+	elif before:
+		start = DateTime.min
+
+		dt = pendulum.datetime(
+			parsed.year,
+			parsed.month or 1,
+			parsed.day or 1,
+			parsed.hour or 23,
+			parsed.minute or 59,
+			parsed.second or 59,
+			0,
+			tz=parsed_tz
+		)
+
+		if not parsed.month:
+			dt = dt.start_of('year')
+		elif not parsed.day:
+			dt = dt.start_of('month')
+		elif not parsed.hour:
+			dt = dt.start_of('day')
+		elif not parsed.minute:
+			dt = dt.start_of('hour')
+		elif not parsed.second:
+			dt = dt.start_of('minute')
+
+		return pendulum.period(
+			start,
+			dt
+		)
+	elif after:
+		end = DateTime.max
+
+		dt = pendulum.datetime(
+			parsed.year,
+			parsed.month or 1,
+			parsed.day or 1,
+			parsed.hour or 23,
+			parsed.minute or 59,
+			parsed.second or 59,
+			99999,
+			tz=parsed_tz
+		)
+
+		if not parsed.month:
+			dt = dt.end_of('year')
+		elif not parsed.day:
+			dt = dt.end_of('month')
+		elif not parsed.hour:
+			dt = dt.start_of('day')
+		elif not parsed.minute:
+			dt = dt.start_of('hour')
+		elif not parsed.second:
+			dt = dt.start_of('minute')
+
+		return pendulum.period(
+			dt,
+			end
+		)
 
 
 ########
@@ -249,19 +422,78 @@ local_options.add_argument(
 # Filter #
 ##########
 
-filter_ = argparse.ArgumentParser(
+# Metadata
+
+filter_metadata = argparse.ArgumentParser(
 	argument_default=argparse.SUPPRESS,
 	add_help=False
 )
 
-filter_options = filter_.add_argument_group("Filter")
-filter_options.add_argument(
+metadata_options = filter_metadata.add_argument_group("Filter")
+metadata_options.add_argument(
 	'-f', '--filter',
 	metavar='FILTER',
 	action='append',
 	dest='filters',
 	type=parse_filter,
 	help="Metadata filters.\nCan be specified multiple times."
+)
+
+# Dates
+
+filter_dates = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+dates_options = filter_dates.add_argument_group("Filter")
+dates_options.add_argument(
+	'--created-in',
+	metavar='DT',
+	type=lambda d: time_period(d, in_=True),
+	help="Include songs created in year or year/month."
+)
+dates_options.add_argument(
+	'--created-on',
+	metavar='DT',
+	type=lambda d: time_period(d, on=True),
+	help="Include songs created on date."
+)
+dates_options.add_argument(
+	'--created-before',
+	metavar='DT',
+	type=lambda d: time_period(d, before=True),
+	help="Include songs created before datetime."
+)
+dates_options.add_argument(
+	'--created-after',
+	metavar='DT',
+	type=lambda d: time_period(d, after=True),
+	help="Include songs created after datetime."
+)
+dates_options.add_argument(
+	'--modified-in',
+	metavar='DT',
+	type=lambda d: time_period(d, in_=True),
+	help="Include songs created in year or year/month."
+)
+dates_options.add_argument(
+	'--modified-on',
+	metavar='DT',
+	type=lambda d: time_period(d, on=True),
+	help="Include songs created on date."
+)
+dates_options.add_argument(
+	'--modified-before',
+	metavar='DT',
+	type=lambda d: time_period(d, before=True),
+	help="Include songs modified before datetime."
+)
+dates_options.add_argument(
+	'--modified-after',
+	metavar='DT',
+	type=lambda d: time_period(d, after=True),
+	help="Include songs modified after datetime."
 )
 
 
@@ -417,7 +649,8 @@ delete_command = subcommands.add_parser(
 		logging_,
 		ident,
 		mc_ident,
-		filter_,
+		filter_metadata,
+		filter_dates,
 		yes
 	],
 	add_help=False
@@ -442,7 +675,8 @@ download_command = subcommands.add_parser(
 		mm_ident,
 		mc_ident,
 		local,
-		filter_,
+		filter_metadata,
+		filter_dates,
 		sync,
 		output,
 		include
@@ -485,7 +719,7 @@ search_command = subcommands.add_parser(
 		meta,
 		logging_,
 		mc_ident,
-		filter_,
+		filter_metadata,
 		yes
 	],
 	add_help=False
@@ -510,7 +744,8 @@ upload_command = subcommands.add_parser(
 		mm_ident,
 		mc_ident,
 		local,
-		filter_,
+		filter_metadata,
+		filter_dates,
 		upload_misc,
 		sync,
 		include
@@ -595,6 +830,15 @@ def set_defaults(args):
 		elif k in ['no_use_hash', 'no_use_metadata']:
 			defaults[k] = v
 			defaults[f"{k.replace('no_', '')}"] = not v
+		elif k.startswith(('created', 'modified')):
+			if k.endswith('in'):
+				defaults[k] = time_period(v, in_=True)
+			elif k.endswith('on'):
+				defaults[k] = time_period(v, on=True)
+			elif k.endswith('before'):
+				defaults[k] = time_period(v, before=True)
+			elif k.endswith('after'):
+				defaults[k] = time_period(v, after=True)
 		else:
 			defaults[k] = v
 

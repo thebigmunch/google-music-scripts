@@ -25,6 +25,7 @@ google-music = "^3.0"
 google-music-proto = "^2.4"
 google-music-utils = "^2.1"
 loguru = "^0.2"
+pendulum = "^2.0"
 natsort = "^5.2"
 tomlkit = "^0.5"
 

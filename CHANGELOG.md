@@ -19,6 +19,16 @@ This project adheres to [Semantic Versioning](https://semver.org).
   * ``-xp, --exclude-path``
   * ``-xr, --exclude-regex``
   * ``-xg, --exclude-glob``
+* Options to filter songs by date for ``download`` and ``upload`` commands:
+  * ``--created-in``
+  * ``--created-on``
+  * ``--created-before``
+  * ``--created-after``
+  * ``--modified-in``
+  * ``--modified-on``
+  * ``--modified-before``
+  * ``--modified-after``
+	
 
 ### Changed
 
