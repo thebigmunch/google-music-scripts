@@ -281,13 +281,43 @@ meta = argparse.ArgumentParser(
 meta_options = meta.add_argument_group("Options")
 meta_options.add_argument(
 	'-h', '--help',
-	action='help'
+	action='help',
+	help="Display help."
 )
 meta_options.add_argument(
 	'-V', '--version',
 	action='version',
 	version=f"{__title__} {__version__}",
-	help=""
+	help="Output version."
+)
+
+
+##########
+# Action #
+##########
+
+dry_run = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+dry_run_options = dry_run.add_argument_group("Action")
+dry_run_options.add_argument(
+	'-n', '--dry-run',
+	action='store_true',
+	help="Output results without taking action."
+)
+
+yes = argparse.ArgumentParser(
+	argument_default=argparse.SUPPRESS,
+	add_help=False
+)
+
+yes_options = yes.add_argument_group("Action")
+yes_options.add_argument(
+	'-y', '--yes',
+	action='store_true',
+	help="Don't ask for confirmation."
 )
 
 
@@ -302,11 +332,6 @@ logging_ = argparse.ArgumentParser(
 
 logging_options = logging_.add_argument_group("Logging")
 logging_options.add_argument(
-	'-l', '--log',
-	action='store_true',
-	help="Log to file."
-)
-logging_options.add_argument(
 	'-v', '--verbose',
 	action='count',
 	help="Increase verbosity of output."
@@ -317,9 +342,9 @@ logging_options.add_argument(
 	help="Decrease verbosity of output."
 )
 logging_options.add_argument(
-	'-n', '--dry-run',
+	'--log-to-file',
 	action='store_true',
-	help="Output list of songs that would be uploaded."
+	help="Log to file as well as stdout."
 )
 
 
@@ -339,11 +364,6 @@ ident_options.add_argument(
 	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
 )
 
-
-##########
-# Mobile #
-##########
-
 mc_ident = argparse.ArgumentParser(
 	argument_default=argparse.SUPPRESS,
 	add_help=False
@@ -355,11 +375,6 @@ mc_ident_options.add_argument(
 	metavar='ID',
 	help="A mobile device id."
 )
-
-
-#################
-# Music Manager #
-#################
 
 mm_ident = argparse.ArgumentParser(
 	argument_default=argparse.SUPPRESS,
@@ -449,68 +464,51 @@ filter_dates = argparse.ArgumentParser(
 dates_options = filter_dates.add_argument_group("Filter")
 dates_options.add_argument(
 	'--created-in',
-	metavar='DT',
+	metavar='DATE',
 	type=lambda d: time_period(d, in_=True),
 	help="Include songs created in year or year/month."
 )
 dates_options.add_argument(
 	'--created-on',
-	metavar='DT',
+	metavar='DATE',
 	type=lambda d: time_period(d, on=True),
 	help="Include songs created on date."
 )
 dates_options.add_argument(
 	'--created-before',
-	metavar='DT',
+	metavar='DATE',
 	type=lambda d: time_period(d, before=True),
 	help="Include songs created before datetime."
 )
 dates_options.add_argument(
 	'--created-after',
-	metavar='DT',
+	metavar='DATE',
 	type=lambda d: time_period(d, after=True),
 	help="Include songs created after datetime."
 )
 dates_options.add_argument(
 	'--modified-in',
-	metavar='DT',
+	metavar='DATE',
 	type=lambda d: time_period(d, in_=True),
 	help="Include songs created in year or year/month."
 )
 dates_options.add_argument(
 	'--modified-on',
-	metavar='DT',
+	metavar='DATE',
 	type=lambda d: time_period(d, on=True),
 	help="Include songs created on date."
 )
 dates_options.add_argument(
 	'--modified-before',
-	metavar='DT',
+	metavar='DATE',
 	type=lambda d: time_period(d, before=True),
 	help="Include songs modified before datetime."
 )
 dates_options.add_argument(
 	'--modified-after',
-	metavar='DT',
+	metavar='DATE',
 	type=lambda d: time_period(d, after=True),
 	help="Include songs modified after datetime."
-)
-
-
-#######
-# Yes #
-#######
-
-yes = argparse.ArgumentParser(
-	argument_default=argparse.SUPPRESS,
-	add_help=False
-)
-
-yes_options = yes.add_argument_group("Misc")
-yes_options.add_argument(
-	'-y', '--yes',
-	action='store_true',
-	help="Don't ask for confirmation."
 )
 
 
@@ -646,12 +644,13 @@ delete_command = subcommands.add_parser(
 	usage="gms delete [OPTIONS]",
 	parents=[
 		meta,
+		dry_run,
+		yes,
 		logging_,
 		ident,
 		mc_ident,
 		filter_metadata,
-		filter_dates,
-		yes
+		filter_dates
 	],
 	add_help=False
 )
@@ -670,6 +669,7 @@ download_command = subcommands.add_parser(
 	usage="gms download [OPTIONS]",
 	parents=[
 		meta,
+		dry_run,
 		logging_,
 		ident,
 		mm_ident,
@@ -717,10 +717,10 @@ search_command = subcommands.add_parser(
 	usage="gms search [OPTIONS]",
 	parents=[
 		meta,
+		yes,
 		logging_,
 		mc_ident,
-		filter_metadata,
-		yes
+		filter_metadata
 	],
 	add_help=False
 )
@@ -739,6 +739,7 @@ upload_command = subcommands.add_parser(
 	usage="gms upload [OPTIONS] [INCLUDE_PATH]...",
 	parents=[
 		meta,
+		dry_run,
 		logging_,
 		ident,
 		mm_ident,
@@ -760,7 +761,7 @@ def set_defaults(args):
 	# Set defaults.
 	defaults.verbose = 0
 	defaults.quiet = 0
-	defaults.log = False
+	defaults.log_to_file = False
 	defaults.dry_run = False
 	defaults.username = ''
 	defaults.filters = []
@@ -878,7 +879,7 @@ def run():
 	configure_logging(
 		args.verbose - args.quiet,
 		username=args.username,
-		log_to_file=args.log
+		log_to_file=args.log_to_file
 	)
 
 	try:
