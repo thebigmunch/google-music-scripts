@@ -19,14 +19,14 @@ homepage = "https://github.com/thebigmunch/google-music-scripts"
 [tool.poetry.dependencies]
 python = "^3.6"
 
-appdirs = "^1.4"
+appdirs = "^1.0"
 audio-metadata = "^0.4"
 google-music = "^3.0"
 google-music-proto = "^2.4"
 google-music-utils = "^2.1"
 loguru = "^0.2"
 pendulum = "^2.0"
-natsort = "^5.2"
+natsort = "^5.0"
 tomlkit = "^0.5"
 
 flake8 = { version = "^3.5", optional = true }
