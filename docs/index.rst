@@ -72,7 +72,7 @@ The syntax is as follows:
 	* Matching is done case-insensitively.
 	* For convenience, a single or first condition can leave off the ``+``, but not ``-``.
 
-E.g:
+Examples:
 	* ``gms download -f 'artist[Beck]+album[Guero]-title[E-Pro]'``
 	  would download all songs by Beck from the album Guero without E-Pro in the title.
 	* ``gms download -f 'artist[Beck]+album[Guero]-title[E-Pro]' -f 'artist[Daft Punk]'``
@@ -95,7 +95,7 @@ The format supported follows ISO 8061 with the abilility to use partial datetime
 A regex test is found
 `here <http://www.pyregex.com/?id=eyJyZWdleCI6Iig%2FUDx5ZWFyPlxcZHs0fSlbLVxcc10%2FKD9QPG1vbnRoPlxcZHsxLDJ9KT9bLVxcc10%2FKD9QPGRheT5cXGR7MSwyfSk%2FW1RcXHNdPyg%2FUDxob3VyPlxcZHsxLDJ9KT9bOlxcc10%2FKD9QPG1pbnV0ZT5cXGR7MSwyfSk%2FWzpcXHNdPyg%2FUDxzZWNvbmQ%2BXFxkezEsMn0pPyg%2FUDx0el9vcGVyPlsrXFwtXFxzXSk%2FKD9QPHR6X2hvdXI%2BXFxkezEsMn0pP1s6XFxzXT8oP1A8dHpfbWludXRlPlxcZHsxLDJ9KT8iLCJmbGFncyI6MCwibWF0Y2hfdHlwZSI6Im1hdGNoIiwidGVzdF9zdHJpbmciOiIyMDE5LTAyLTA0VDEyOjU5OjU5LTA1MDAifQ%3D%3D>`_.
 
-E.g:
+Examples:
 	* ``gms upload --created-in 2019`` would upload files created in 2019.
 	* ``gms upload --created-in 2019-02`` would upload files created in February 2019.
 	* ``gms download --created-on 2019-02-04`` would download songs uploaded to
@@ -107,6 +107,77 @@ E.g:
 	* ``gms delete --created-after '2019-02-04 12:00:00-05:00`` would delete
 	  songs uploaded to Google Music after 12 noon (GMT-5:00) on February 4th, 2019.
 
+
+Output Templates
+----------------
+
+The ``download`` command supports defining an output template.
+An output template uses patters, as described below, to use
+values from metadata fields in the output.
+If a field for a pattern does not exist in the song,
+the pattern remains in the download filepath.
+
++----------------+-----------------+
+| Pattern        | Fields          |
++================+=================+
+| %album%        | - album         |
++----------------+-----------------+
+| %albumartist%  | - albumartist   |
+|                | - album_artist  |
+|                | - albumArtist   |
++----------------+-----------------+
+| %artist%       | - artist        |
++----------------+-----------------+
+| %date%         | - date          |
++----------------+-----------------+
+| %disc%         | - discnumber    |
+|                | - disc_number   |
+|                | - discNumber    |
++----------------+-----------------+
+| %disc2%        | - discnumber    |
+|                | - disc_number   |
+|                | - discNumber    |
+|                |                 |
+|                | (zero-padded)   |
++----------------+-----------------+
+| %discnumber%   | - discnumber    |
+|                | - disc_number   |
+|                | - discNumber    |
++----------------+-----------------+
+| %discnumber2%  | - discnumber    |
+|                | - disc_number   |
+|                | - discNumber    |
+|                |                 |
+|                | (zero-padded)   |
++----------------+-----------------+
+| %genre%        | - genre         |
++----------------+-----------------+
+| %title%        | - title         |
++----------------+-----------------+
+| %track%        | - tracknumber   |
+|                | - track_number  |
+|                | - trackNumber   |
++----------------+-----------------+
+| %track2%       | - tracknumber   |
+|                | - track_number  |
+|                | - trackNumber   |
+|                |                 |
+|                | (zero-padded)   |
++----------------+-----------------+
+| %tracknumber%  | - tracknumber   |
+|                | - track_number  |
+|                | - trackNumber   |
++----------------+-----------------+
+| %tracknumber2% | - tracknumber   |
+|                | - track_number  |
+|                | - trackNumber   |
+|                |                 |
+|                | (zero-padded)   |
++----------------+-----------------+
+
+Examples:
+	* ``%track% - %title%``
+	* ``%artist%/%album%/%track2% - %title%``
 
 
 Transcoding - ffmpeg/avconv
