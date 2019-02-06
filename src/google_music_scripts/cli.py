@@ -342,6 +342,11 @@ logging_options.add_argument(
 	help="Decrease verbosity of output."
 )
 logging_options.add_argument(
+	'--debug',
+	action='store_true',
+	help="Output log messages from dependencies."
+)
+logging_options.add_argument(
 	'--log-to-file',
 	action='store_true',
 	help="Log to file as well as stdout."
@@ -761,6 +766,7 @@ def set_defaults(args):
 	# Set defaults.
 	defaults.verbose = 0
 	defaults.quiet = 0
+	defaults.debug = False
 	defaults.log_to_file = False
 	defaults.dry_run = False
 	defaults.username = ''
@@ -879,6 +885,7 @@ def run():
 	configure_logging(
 		args.verbose - args.quiet,
 		username=args.username,
+		debug=args.debug,
 		log_to_file=args.log_to_file
 	)
 

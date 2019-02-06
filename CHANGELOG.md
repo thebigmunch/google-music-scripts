@@ -28,7 +28,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
   * ``--modified-on``
   * ``--modified-before``
   * ``--modified-after``
-	
+* ``--debug`` option to enable logging messages from dependencies.
 
 ### Changed
 

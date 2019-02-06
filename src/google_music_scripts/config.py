@@ -122,15 +122,15 @@ def ensure_log_dir(username=None):
 	return log_dir
 
 
-def configure_logging(modifier=0, *, username=None, log_to_file=False):
+def configure_logging(modifier=0, *, username=None, debug=False, log_to_file=False):
 	logger.remove()
 
 	verbosity = 4 + modifier
 
 	if verbosity < 0:
 		verbosity = 0
-	elif verbosity > 6:
-		verbosity = 6
+	elif verbosity > 7:
+		verbosity = 7
 
 	log_level = VERBOSITY_LOG_LEVELS[verbosity]
 	logger.add(
@@ -139,6 +139,12 @@ def configure_logging(modifier=0, *, username=None, log_to_file=False):
 		format=LOG_FORMAT,
 		backtrace=False
 	)
+
+	if debug:
+		logger.enable('audio_metadata')
+		logger.enable('google_music')
+		logger.enable('google_music-proto')
+		logger.enable('google_music_utils')
 
 	if log_to_file:
 		log_dir = ensure_log_dir(username=username)
