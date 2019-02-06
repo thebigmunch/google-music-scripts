@@ -8,6 +8,11 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/3.0.0...master)
 
+
+## [4.0.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/4.0.0) (2019-02-06)
+
+[Commits](https://github.com/thebigmunch/google-music-scripts/compare/3.0.0...4.0.0)
+
 ### Added
 
 * Sync functionality to ``download`` and ``upload`` commands.
