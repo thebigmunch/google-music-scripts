@@ -760,7 +760,29 @@ upload_command = subcommands.add_parser(
 )
 
 
-def set_defaults(args):
+def parse_args():
+	return gms.parse_args(namespace=Namespace())
+
+
+def check_args(args):
+	if all(
+		option in args
+		for option in ['use_hash', 'no_use_hash']
+	):
+		raise ValueError(
+			"Use one of --use-hash/--no-use-hash', not both."
+		)
+
+	if all(
+		option in args
+		for option in ['use_metadata', 'no_use_metadata']
+	):
+		raise ValueError(
+			"Use one of --use-metadata/--no-use-metadata', not both."
+		)
+
+
+def default_args(args):
 	defaults = Namespace()
 
 	# Set defaults.
@@ -852,44 +874,38 @@ def set_defaults(args):
 	return defaults
 
 
-def run():
-	parsed = gms.parse_args(namespace=Namespace())
+def merge_defaults(defaults, parsed):
+	args = Namespace()
 
-	if parsed.get('_command'):
-		command = parsed._command
-	else:
-		gms.parse_args(['-h'])
-
-	if all(
-		option in parsed
-		for option in ['use_hash', 'no_use_hash']
-	):
-		raise ValueError(
-			"Use one of --use-hash/--no-use-hash', not both."
-		)
-
-	if all(
-		option in parsed
-		for option in ['use_metadata', 'no_use_metadata']
-	):
-		raise ValueError(
-			"Use one of --use-metadata/--no-use-metadata', not both."
-		)
-
-	args = set_defaults(parsed)
+	args.update(defaults)
 	args.update(parsed)
 
 	if args.get('no_recursion'):
 		args.max_depth = 0
 
-	configure_logging(
-		args.verbose - args.quiet,
-		username=args.username,
-		debug=args.debug,
-		log_to_file=args.log_to_file
-	)
+	return args
 
+
+def run():
 	try:
+		parsed = parse_args()
+
+		if parsed.get('_command'):
+			command = parsed._command
+		else:
+			gms.parse_args(['-h'])
+
+		defaults = default_args(parsed)
+
+		args = merge_defaults(defaults, parsed)
+
+		configure_logging(
+			args.verbose - args.quiet,
+			username=args.username,
+			debug=args.debug,
+			log_to_file=args.log_to_file
+		)
+
 		DISPATCH[command](args)
 	except KeyboardInterrupt:
 		gms.exit(130, "Interrupted by user")
