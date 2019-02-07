@@ -369,6 +369,8 @@ ident_options.add_argument(
 	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
 )
 
+# Mobile Client
+
 mc_ident = argparse.ArgumentParser(
 	argument_default=argparse.SUPPRESS,
 	add_help=False
@@ -380,6 +382,8 @@ mc_ident_options.add_argument(
 	metavar='ID',
 	help="A mobile device id."
 )
+
+# Music Manager
 
 mm_ident = argparse.ArgumentParser(
 	argument_default=argparse.SUPPRESS,

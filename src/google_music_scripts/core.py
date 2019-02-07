@@ -64,7 +64,7 @@ def filter_google_dates(
 	matched_songs = songs
 
 	def _dt_from_gm_timestamp(gm_timestamp):
-		return pendulum.from_timestamp(int(gm_timestamp) // 1000000)
+		return pendulum.from_timestamp(gm_utils.from_gm_timestamp(gm_timestamp))
 
 	def _match_created_date(songs, period):
 		return (
