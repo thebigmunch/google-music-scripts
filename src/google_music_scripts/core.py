@@ -247,6 +247,8 @@ def get_local_songs(
 			continue
 
 		if filepath.is_dir():
+			start_level = len(filepath.parts)
+
 			exclude_files = set()
 			for exclude_glob in exclude_globs:
 				exclude_files |= set(filepath.rglob(exclude_glob))
@@ -254,6 +256,7 @@ def get_local_songs(
 			for path in filepath.glob('**/*'):
 				if (
 					path.is_file()
+					and len(path.parent.parts) - start_level <= max_depth
 					and path not in exclude_files
 					and not _exclude_paths(path, exclude_paths)
 					and not _exclude_regexes(path, exclude_regexes)

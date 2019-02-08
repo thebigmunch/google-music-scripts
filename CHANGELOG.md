@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/3.0.0...master)
 
+### Fixed
+
+* ``max_depth`` parameter to ``get_local_songs`` not functioning.
+
 
 ## [4.0.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/4.0.0) (2019-02-06)
 
