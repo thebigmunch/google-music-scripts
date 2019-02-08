@@ -52,6 +52,13 @@ DISPATCH = {
 }
 
 
+@attrs(slots=True, frozen=True)
+class FilterCondition:
+	oper = attrib(converter=lambda o: '+' if o == '' else o)
+	field = attrib()
+	pattern = attrib()
+
+
 def _convert_to_int(value):
 	if value is not None:
 		value = int(value)
@@ -115,7 +122,7 @@ def parse_filter(value):
 		raise ValueError(f"'{value}' is not a valid filter.")
 
 	filter_ = [
-		tuple(condition[1:])
+		FilterCondition(*condition[1:])
 		for condition in conditions
 	]
 

@@ -170,11 +170,11 @@ def filter_metadata(songs, filters):
 			include_filters = defaultdict(list)
 			exclude_filters = defaultdict(list)
 
-			for oper, field, value in filter_:
-				if oper in ['+', '']:
-					include_filters[field].append(value)
-				elif oper == '-':
-					exclude_filters[field].append(value)
+			for condition in filter_:
+				if condition.oper == '+':
+					include_filters[condition.field].append(condition.pattern)
+				elif condition.oper == '-':
+					exclude_filters[condition.field].append(condition.pattern)
 
 			matched = songs
 
