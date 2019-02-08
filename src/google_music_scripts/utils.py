@@ -6,13 +6,14 @@ __all__ = [
 ]
 
 import os
-import subprocess
+import re
 from collections.abc import MutableMapping
 from pathlib import Path
 
 import google_music_utils as gm_utils
 import pprintpp
-from loguru import logger
+
+CYGWIN_PATH_RE = re.compile(r'(/(cygdrive/)?)(.*)')
 
 
 class DictMixin(MutableMapping):
@@ -76,18 +77,14 @@ def convert_cygwin_path(filepath):
 		subprocess.CalledProcessError
 	"""
 
-	try:
-		win_path = subprocess.run(
-			["cygpath", "-aw", filepath],
-			check=True,
-			stdout=subprocess.PIPE,
-			universal_newlines=True
-		).stdout.strip()
-	except (FileNotFoundError, subprocess.CalledProcessError):
-		logger.exception("Call to cygpath failed.")
-		raise
+	match = CYGWIN_PATH_RE.match(filepath)
+	if not match:
+		return Path(filepath.replace('/', r'\\'))
 
-	return Path(win_path)
+	parts = match.group(3).split('/')
+	parts[0] = f"{parts[0].upper()}:/"
+
+	return Path(*parts)
 
 
 def get_album_art_path(song, album_art_paths):

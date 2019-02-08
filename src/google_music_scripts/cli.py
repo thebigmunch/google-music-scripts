@@ -95,7 +95,7 @@ class SubcommandHelpFormatter(UsageHelpFormatter):
 #########
 
 # I use Windows Python install from Cygwin.
-# This custom click type converts Unix-style paths to Windows-style paths in this case.
+# This type converts Unix-style paths to Windows-style paths in this case.
 def custom_path(value):
 	if os.name == 'nt' and UNIX_PATH_RE.match(str(value)):
 		value = Path(convert_cygwin_path(str(value)))
