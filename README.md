@@ -12,7 +12,7 @@ gmusicapi, [google-music](https://github.com/thebigmunch/google-music).
 
 ## Installation
 
-``pip install - U google-music-scripts``
+``pip install -U google-music-scripts``
 
 
 ## Usage
