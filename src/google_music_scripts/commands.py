@@ -93,9 +93,7 @@ def do_download(args):
 
 	google_songs = get_google_songs(mm, filters=args.filters)
 	base_path = template_to_base_path(args.output, google_songs)
-	filepaths = [base_path]
-	if args.include:
-		filepaths.extend(args.include)
+	filepaths = [base_path, *args.include]
 
 	mc_songs = get_google_songs(mc, filters=args.filters)
 	if any(

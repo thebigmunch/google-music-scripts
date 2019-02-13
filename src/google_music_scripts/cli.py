@@ -808,13 +808,18 @@ def default_args(args):
 	if args._command in ['down', 'download', 'up', 'upload']:
 		defaults.uploader_id = None
 		defaults.device_id = None
+	elif args._command in ['quota']:
+		defaults.uploader_id = None
+	else:
+		defaults.device_id = None
 
+
+	if args._command in ['down', 'download', 'up', 'upload']:
 		defaults.no_recursion = False
 		defaults.max_depth = math.inf
 		defaults.exclude_paths = []
 		defaults.exclude_regexes = []
 		defaults.exclude_globs = []
-		defaults.include = [custom_path('.').resolve()]
 
 		if 'no_use_hash' in args:
 			defaults.use_hash = False
@@ -829,22 +834,18 @@ def default_args(args):
 		else:
 			defaults.use_metadata = True
 			defaults.no_use_metadata = False
-	elif args._command in ['quota']:
-		defaults.uploader_id = None
-	else:
-		defaults.device_id = None
-
-	if args._command in ['del', 'delete', 'search']:
-		defaults.yes = False
 
 	if args._command in ['down', 'download']:
 		defaults.output = str(Path('.').resolve())
+		defaults.include = []
+	elif args._command in ['up', 'upload']:
 		defaults.include = [custom_path('.').resolve()]
-
-	if args._command in ['up', 'upload']:
 		defaults.delete_on_success = False
 		defaults.no_sample = False
 		defaults.album_art = None
+
+	if args._command in ['del', 'delete', 'search']:
+		defaults.yes = False
 
 	config_defaults = get_defaults(args._command, username=args.get('username'))
 	for k, v in config_defaults.items():
