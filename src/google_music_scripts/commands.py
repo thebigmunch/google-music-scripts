@@ -13,7 +13,7 @@ from .core import (
 	filter_local_dates,
 	get_google_songs,
 	get_local_songs,
-	upload_songs
+	upload_songs,
 )
 from .utils import template_to_base_path
 
@@ -119,7 +119,7 @@ def do_download(args):
 			'modified_in',
 			'modified_on',
 			'modified_before',
-			'modified_after'
+			'modified_after',
 		]
 	):
 		mc_songs = filter_google_dates(
@@ -288,7 +288,7 @@ def do_search(args):
 			'modified_in',
 			'modified_on',
 			'modified_before',
-			'modified_after'
+			'modified_after',
 		]
 	):
 		search_results = filter_google_dates(
@@ -301,7 +301,7 @@ def do_search(args):
 			modified_on=args.get('modified_on'),
 			modified_before=args.get('modified_before'),
 			modified_after=args.get('modified_after')
-		),
+		)
 
 	search_results = natsorted(
 		search_results,
@@ -319,7 +319,9 @@ def do_search(args):
 
 		confirm = (
 			args.yes
-			or input(f"\nDisplay {len(search_results)} results? (y/n) ") in ("y", "Y")
+			or input(
+				f"\nDisplay {len(search_results)} results? (y/n) "
+			) in ("y", "Y")
 		)
 
 		if confirm:
@@ -376,7 +378,7 @@ def do_upload(args):
 			'modified_in',
 			'modified_on',
 			'modified_before',
-			'modified_after'
+			'modified_after',
 		]
 	):
 		local_songs = filter_local_dates(

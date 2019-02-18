@@ -94,16 +94,16 @@ def filter_google_dates(
 		created_in,
 		created_on,
 		created_before,
-		created_after
+		created_after,
 	]:
 		if period is not None:
-			matched_songs = _match_created_date(matched_songs, period, )
+			matched_songs = _match_created_date(matched_songs, period)
 
 	for period in [
 		modified_in,
 		modified_on,
 		modified_before,
-		modified_after
+		modified_after,
 	]:
 		if period is not None:
 			matched_songs = _match_modified_date(matched_songs, period)
@@ -153,7 +153,7 @@ def filter_local_dates(
 		created_in,
 		created_on,
 		created_before,
-		created_after
+		created_after,
 	]:
 		if period is not None:
 			matched_filepaths = _match_created_date(matched_filepaths, period)
@@ -162,7 +162,7 @@ def filter_local_dates(
 		modified_in,
 		modified_on,
 		modified_before,
-		modified_after
+		modified_after,
 	]:
 		if period is not None:
 			matched_filepaths = _match_modified_date(matched_filepaths, period)
@@ -229,7 +229,9 @@ def get_google_songs(client, *, filters=None):
 
 	google_songs = client.songs()
 
-	logger.info("Found {} Google songs with {}", len(google_songs), client.__class__.__name__)
+	logger.info(
+		"Found {} Google songs with {}", len(google_songs), client.__class__.__name__
+	)
 
 	matched_songs = filter_metadata(google_songs, filters)
 
@@ -304,6 +306,7 @@ def get_local_songs(
 def upload_songs(
 	mm,
 	filepaths,
+	*,
 	album_art=None,
 	no_sample=False,
 	delete_on_success=False
@@ -359,7 +362,7 @@ def upload_songs(
 					)
 				else:
 					logger.log(
-						'ACTION_FAILURE'
+						'ACTION_FAILURE',
 						"({:>{}}/{}) Failed -- {} | {}",
 						filenum,
 						pad,
@@ -373,6 +376,5 @@ def upload_songs(
 				result['filepath'].unlink()
 			except Exception:
 				logger.warning(
-					"Failed to remove {} after successful upload",
-					result['filepath']
+					"Failed to remove {} after successful upload", result['filepath']
 				)

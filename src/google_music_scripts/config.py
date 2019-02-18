@@ -19,6 +19,7 @@ COMMAND_ALIASES = {
 	'up': 'upload',
 	'upload': 'up'
 }
+
 COMMAND_KEYS = {
 	'del',
 	'delete',
@@ -27,7 +28,7 @@ COMMAND_KEYS = {
 	'quota',
 	'search',
 	'up',
-	'upload'
+	'upload',
 }
 
 CONFIG_BASE_PATH = Path(appdirs.user_config_dir(__title__, __author__))
@@ -49,7 +50,7 @@ VERBOSITY_LOG_LEVELS = {
 	4: 20,
 	5: 15,
 	6: 10,
-	7: 5
+	7: 5,
 }
 
 

@@ -1,7 +1,7 @@
 __all__ = [
 	'CHARACTER_REPLACEMENTS',
 	'TEMPLATE_PATTERNS',
-	'UNIX_PATH_RE'
+	'UNIX_PATH_RE',
 ]
 
 import re

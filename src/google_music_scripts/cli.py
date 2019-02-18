@@ -16,7 +16,7 @@ from .commands import (
 	do_download,
 	do_quota,
 	do_search,
-	do_upload
+	do_upload,
 )
 from .config import configure_logging, get_defaults
 from .constants import UNIX_PATH_RE
@@ -49,7 +49,7 @@ DISPATCH = {
 	'quota': do_quota,
 	'search': do_search,
 	'up': do_upload,
-	'upload': do_upload
+	'upload': do_upload,
 }
 
 
@@ -158,7 +158,9 @@ def time_period(
 	match = DATETIME_RE.match(dt_string)
 
 	if not match or match['year'] is None:
-		raise argparse.ArgumentTypeError(f"'{dt_string}' is not a supported datetime string.")
+		raise argparse.ArgumentTypeError(
+			f"'{dt_string}' is not a supported datetime string."
+		)
 
 	parsed = ParsedDateTime(**match.groupdict())
 
@@ -191,10 +193,7 @@ def time_period(
 		else:
 			end = start.end_of('year')
 
-		return pendulum.period(
-			start,
-			end
-		)
+		return pendulum.period(start, end)
 	elif on:
 		if (
 			not all(
@@ -214,10 +213,7 @@ def time_period(
 			tz=parsed_tz
 		)
 
-		return pendulum.period(
-			dt.start_of('day'),
-			dt.end_of('day')
-		)
+		return pendulum.period(dt.start_of('day'), dt.end_of('day'))
 	elif before:
 		start = DateTime.min
 
@@ -243,10 +239,7 @@ def time_period(
 		elif not parsed.second:
 			dt = dt.start_of('minute')
 
-		return pendulum.period(
-			start,
-			dt
-		)
+		return pendulum.period(start, dt)
 	elif after:
 		end = DateTime.max
 
@@ -272,19 +265,14 @@ def time_period(
 		elif not parsed.second:
 			dt = dt.start_of('minute')
 
-		return pendulum.period(
-			dt,
-			end
-		)
+		return pendulum.period(dt, end)
 
 
 ########
 # Meta #
 ########
 
-meta = argparse.ArgumentParser(
-	add_help=False
-)
+meta = argparse.ArgumentParser(add_help=False)
 
 meta_options = meta.add_argument_group("Options")
 meta_options.add_argument(
@@ -367,14 +355,16 @@ logging_options.add_argument(
 
 ident = argparse.ArgumentParser(
 	argument_default=argparse.SUPPRESS,
-	add_help=False
-)
+	add_help=False)
 
 ident_options = ident.add_argument_group("Identification")
 ident_options.add_argument(
 	'-u', '--username',
 	metavar='USER',
-	help="Your Google username or e-mail address.\nUsed to separate saved credentials."
+	help=(
+		"Your Google username or e-mail address.\n"
+		"Used to separate saved credentials."
+	)
 )
 
 # Mobile Client
@@ -402,7 +392,10 @@ mm_ident_options = mm_ident.add_argument_group("Identification")
 mm_ident_options.add_argument(
 	'--uploader-id',
 	metavar='ID',
-	help="A unique id given as a MAC address (e.g. '00:11:22:33:AA:BB').\nThis should only be provided when the default does not work."
+	help=(
+		"A unique id given as a MAC address (e.g. '00:11:22:33:AA:BB').\n"
+		"This should only be provided when the default does not work."
+	)
 )
 
 
@@ -410,43 +403,56 @@ mm_ident_options.add_argument(
 # Local #
 #########
 
-local = argparse.ArgumentParser(
-	argument_default=argparse.SUPPRESS,
-	add_help=False
-)
+local = argparse.ArgumentParser(argument_default=argparse.SUPPRESS, add_help=False)
 
 local_options = local.add_argument_group("Local")
 local_options.add_argument(
 	'--no-recursion',
 	action='store_true',
-	help="Disable recursion when scanning for local files.\nRecursion is enabled by default."
+	help=(
+		"Disable recursion when scanning for local files.\n"
+		"Recursion is enabled by default."
+	)
 )
 local_options.add_argument(
 	'--max-depth',
 	metavar='DEPTH',
 	type=int,
-	help="Set maximum depth of recursion when scanning for local files.\nDefault is infinite recursion."
+	help=(
+		"Set maximum depth of recursion when scanning for local files.\n"
+		"Default is infinite recursion."
+	)
 )
 local_options.add_argument(
 	'-xp', '--exclude-path',
 	metavar='PATH',
 	action='append',
 	dest='exclude_paths',
-	help="Exclude filepaths.\nCan be specified multiple times."
+	help=(
+		"Exclude filepaths.\n"
+		"Can be specified multiple times."
+	)
 )
 local_options.add_argument(
 	'-xr', '--exclude-regex',
 	metavar='RX',
 	action='append',
 	dest='exclude_regexes',
-	help="Exclude filepaths using regular expressions.\nCan be specified multiple times."
+	help=(
+		"Exclude filepaths using regular expressions.\n"
+		"Can be specified multiple times."
+	)
 )
 local_options.add_argument(
 	'-xg', '--exclude-glob',
 	metavar='GP',
 	action='append',
 	dest='exclude_globs',
-	help="Exclude filepaths using glob patterns.\nCan be specified multiple times.\nAbsolute glob patterns not supported."
+	help=(
+		"Exclude filepaths using glob patterns.\n"
+		"Can be specified multiple times.\n"
+		"Absolute glob patterns not supported."
+	)
 )
 
 
@@ -468,7 +474,10 @@ metadata_options.add_argument(
 	action='append',
 	dest='filters',
 	type=parse_filter,
-	help="Metadata filters.\nCan be specified multiple times."
+	help=(
+		"Metadata filters.\n"
+		"Can be specified multiple times."
+	)
 )
 
 # Dates
@@ -548,13 +557,19 @@ upload_misc_options.add_argument(
 upload_misc_options.add_argument(
 	'--no-sample',
 	action='store_true',
-	help="Don't create audio sample with ffmpeg/avconv.\nSend empty audio sample."
+	help=(
+		"Don't create audio sample with ffmpeg/avconv.\n"
+		"Send empty audio sample."
+	)
 )
 upload_misc_options.add_argument(
 	'--album-art',
 	metavar='ART_PATHS',
 	type=split_album_art_paths,
-	help="Comma-separated list of album art filepaths.\nCan be relative filenames and/or absolute filepaths."
+	help=(
+		"Comma-separated list of album art filepaths.\n"
+		"Can be relative filenames and/or absolute filepaths."
+	)
 )
 
 
@@ -667,7 +682,7 @@ delete_command = subcommands.add_parser(
 		ident,
 		mc_ident,
 		filter_metadata,
-		filter_dates
+		filter_dates,
 	],
 	add_help=False
 )
@@ -696,7 +711,7 @@ download_command = subcommands.add_parser(
 		filter_dates,
 		sync,
 		output,
-		include
+		include,
 	],
 	add_help=False
 )
@@ -716,7 +731,7 @@ quota_command = subcommands.add_parser(
 		meta,
 		logging_,
 		ident,
-		mm_ident
+		mm_ident,
 	],
 	add_help=False
 )
@@ -737,7 +752,7 @@ search_command = subcommands.add_parser(
 		yes,
 		logging_,
 		mc_ident,
-		filter_metadata
+		filter_metadata,
 	],
 	add_help=False
 )
@@ -766,7 +781,7 @@ upload_command = subcommands.add_parser(
 		filter_dates,
 		upload_misc,
 		sync,
-		include
+		include,
 	],
 	add_help=False
 )
@@ -781,17 +796,13 @@ def check_args(args):
 		option in args
 		for option in ['use_hash', 'no_use_hash']
 	):
-		raise ValueError(
-			"Use one of --use-hash/--no-use-hash', not both."
-		)
+		raise ValueError("Use one of --use-hash/--no-use-hash', not both.")
 
 	if all(
 		option in args
 		for option in ['use_metadata', 'no_use_metadata']
 	):
-		raise ValueError(
-			"Use one of --use-metadata/--no-use-metadata', not both."
-		)
+		raise ValueError("Use one of --use-metadata/--no-use-metadata', not both.")
 
 
 def default_args(args):
@@ -813,7 +824,6 @@ def default_args(args):
 		defaults.uploader_id = None
 	else:
 		defaults.device_id = None
-
 
 	if args._command in ['down', 'download', 'up', 'upload']:
 		defaults.no_recursion = False

@@ -7,7 +7,7 @@ __all__ = [
 	'__title__',
 	'__url__',
 	'__version__',
-	'__version_info__'
+	'__version_info__',
 ]
 
 __title__ = 'google-music-scripts'

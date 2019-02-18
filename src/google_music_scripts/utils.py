@@ -2,7 +2,7 @@ __all__ = [
 	'DictMixin',
 	'convert_cygwin_path',
 	'get_album_art_path',
-	'template_to_base_path'
+	'template_to_base_path',
 ]
 
 import os
@@ -39,7 +39,7 @@ class DictMixin(MutableMapping):
 		self.__dict__[key] = value
 
 	def __delitem__(self, key):
-		del(self.__dict__[key])
+		del self.__dict__[key]
 
 	def __missing__(self, key):
 		return KeyError(key)
