@@ -343,9 +343,24 @@ logging_options.add_argument(
 	help="Output log messages from dependencies."
 )
 logging_options.add_argument(
+	'--log-to-stdout',
+	action='store_true',
+	help="Log to stdout."
+)
+logging_options.add_argument(
+	'--no-log-to-stdout',
+	action='store_true',
+	help="Don't log to stdout."
+)
+logging_options.add_argument(
 	'--log-to-file',
 	action='store_true',
-	help="Log to file as well as stdout."
+	help="Log to file."
+)
+logging_options.add_argument(
+	'--no-log-to-file',
+	action='store_true',
+	help="Don't log to file."
 )
 
 
@@ -812,10 +827,23 @@ def default_args(args):
 	defaults.verbose = 0
 	defaults.quiet = 0
 	defaults.debug = False
-	defaults.log_to_file = False
 	defaults.dry_run = False
 	defaults.username = ''
 	defaults.filters = []
+
+	if 'no_log_to_stdout' in args:
+		defaults.log_to_stdout = False
+		defaults.no_log_to_stdout = True
+	else:
+		defaults.log_to_stdout = True
+		defaults.no_log_to_stdout = False
+
+	if 'log_to_file' in args:
+		defaults.log_to_file = True
+		defaults.no_log_to_file = False
+	else:
+		defaults.log_to_file = False
+		defaults.no_log_to_file = True
 
 	if args._command in ['down', 'download', 'up', 'upload']:
 		defaults.uploader_id = None
@@ -876,10 +904,20 @@ def default_args(args):
 				custom_path(val)
 				for val in v
 			]
-		elif k in ['use_hash', 'use_metadata']:
+		elif k in [
+			'log_to_stdout',
+			'log_to_file',
+			'use_hash',
+			'use_metadata',
+		]:
 			defaults[k] = v
 			defaults[f"no_{k}"] = not v
-		elif k in ['no_use_hash', 'no_use_metadata']:
+		elif k in [
+			'no_log_to_stdout',
+			'no_log_to_file',
+			'no_use_hash',
+			'no_use_metadata',
+		]:
 			defaults[k] = v
 			defaults[f"{k.replace('no_', '')}"] = not v
 		elif k.startswith(('created', 'modified')):
@@ -926,6 +964,7 @@ def run():
 			args.verbose - args.quiet,
 			username=args.username,
 			debug=args.debug,
+			log_to_stdout=args.log_to_stdout,
 			log_to_file=args.log_to_file
 		)
 
