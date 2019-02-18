@@ -8,6 +8,11 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/4.0.1...master)
 
+### Changed
+
+* Output message verbosity hierarchy.
+  There is now a more coherent, consistent strategy.
+
 
 ## [4.0.1](https://github.com/thebigmunch/google-music-scripts/releases/tag/4.0.1) (2019-02-08)
 

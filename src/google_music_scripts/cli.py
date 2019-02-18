@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pendulum
 from attr import attrib, attrs
+from loguru import logger
 from pendulum import DateTime
 from pendulum.tz import fixed_timezone
 
@@ -919,5 +920,7 @@ def run():
 		)
 
 		DISPATCH[command](args)
+
+		logger.log('NORMAL', "All done!")
 	except KeyboardInterrupt:
 		gms.exit(130, "Interrupted by user")

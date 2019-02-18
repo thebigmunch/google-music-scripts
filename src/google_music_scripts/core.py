@@ -13,7 +13,7 @@ from .utils import get_album_art_path
 
 
 def download_songs(mm, songs, template=None):
-	logger.success(f"Downloading {len(songs)} songs from Google Music")
+	logger.log('NORMAL', "Downloading songs from Google Music")
 
 	if not template:
 		template = Path.cwd()
@@ -29,13 +29,17 @@ def download_songs(mm, songs, template=None):
 			audio, _ = mm.download(song)
 		except Exception as e:  # TODO: More specific exception.
 			logger.log(
-				'FAILURE',
-				f"({songnum:>{pad}}/{total}) Failed -- {song} | {e}"
+				'ACTION_FAILURE',
+				"({:>{}}/{}) Failed -- {} | {}",
+				songnum,
+				pad,
+				total,
+				song,
+				e
 			)
 		else:
 			tags = audio_metadata.loads(audio).tags
 			filepath = gm_utils.template_to_filepath(template, tags).with_suffix('.mp3')
-
 			if filepath.is_file():
 				filepath.unlink()
 
@@ -43,8 +47,14 @@ def download_songs(mm, songs, template=None):
 			filepath.touch()
 			filepath.write_bytes(audio)
 
-			logger.success(
-				f"({songnum:>{pad}}/{total}) Downloaded -- {filepath} ({song['id']})"
+			logger.log(
+				'ACTION_SUCCESS',
+				"({:>{}}/{}) Downloaded -- {} ({song['id']})",
+				songnum,
+				pad,
+				total,
+				filepath,
+				song['id']
 			)
 
 
@@ -162,8 +172,7 @@ def filter_local_dates(
 
 def filter_metadata(songs, filters):
 	if filters:
-		logger.success("Filtering songs")
-
+		logger.log('NORMAL', "Filtering songs")
 		matched_songs = []
 
 		for filter_ in filters:
@@ -207,6 +216,8 @@ def filter_metadata(songs, filters):
 			for song in matched:
 				if song not in matched_songs:
 					matched_songs.append(song)
+
+		logger.info("Filtered {} songs by metadata", len(songs) - len(matched_songs))
 	else:
 		matched_songs = songs
 
@@ -214,7 +225,15 @@ def filter_metadata(songs, filters):
 
 
 def get_google_songs(client, *, filters=None):
-	return filter_metadata(client.songs(), filters)
+	logger.log('NORMAL', "Loading Google songs with {}", client.__class__.__name__)
+
+	google_songs = client.songs()
+
+	logger.info("Found {} Google songs with {}", len(google_songs), client.__class__.__name__)
+
+	matched_songs = filter_metadata(google_songs, filters)
+
+	return matched_songs
 
 
 def get_local_songs(
@@ -226,6 +245,8 @@ def get_local_songs(
 	exclude_regexes=None,
 	exclude_globs=None
 ):
+	logger.log('NORMAL', "Loading local songs")
+
 	def _exclude_paths(path, exclude_paths):
 		return any(
 			str(Path(exclude_path)) in str(path)
@@ -273,6 +294,8 @@ def get_local_songs(
 				) is not None:
 					local_songs.append(filepath)
 
+	logger.info("Found {} local songs", len(local_songs))
+
 	matched_songs = filter_metadata(local_songs, filters)
 
 	return matched_songs
@@ -285,7 +308,7 @@ def upload_songs(
 	no_sample=False,
 	delete_on_success=False
 ):
-	logger.success(f"Uploading {len(filepaths)} songs to Google Music")
+	logger.log('NORMAL', "Uploading songs")
 
 	filenum = 0
 	total = len(filepaths)
@@ -302,29 +325,54 @@ def upload_songs(
 			no_sample=no_sample
 		)
 
-		if result['reason'] == 'Uploaded':
-			logger.success(
-				f"({filenum:>{pad}}/{total}) Uploaded -- {result['filepath']} ({result['song_id']})"
-			)
-		elif result['reason'] == 'Matched':
-			logger.success(
-				f"({filenum:>{pad}}/{total}) Matched -- {result['filepath']} ({result['song_id']})"
-			)
-		else:
-			if 'song_id' in result:
-				logger.success(
-					f"({filenum:>{pad}}/{total}) Already exists -- {result['filepath']} ({result['song_id']})"
+		if logger._min_level <= 15:
+			if result['reason'] == 'Uploaded':
+				logger.log(
+					'ACTION_SUCCESS',
+					"({:>{}}/{}) Uploaded -- {} ({})",
+					filenum,
+					pad,
+					total,
+					result['filepath'],
+					result['song_id']
+				)
+			elif result['reason'] == 'Matched':
+				logger.log(
+					'ACTION_SUCCESS',
+					"({:>{}}/{}) Matched -- {} ({})",
+					filenum,
+					pad,
+					total,
+					result['filepath'],
+					result['song_id']
 				)
 			else:
-				logger.log(
-					'FAILURE'
-					f"({filenum:>{pad}}/{total}) Failed -- {result['filepath']} | {result['reason']}"
-				)
+				if 'song_id' in result:
+					logger.log(
+						'ACTION_SUCCESS',
+						"({:>{}}/{}) Already exists -- {} ({})",
+						filenum,
+						pad,
+						total,
+						result['filepath'],
+						result['song_id']
+					)
+				else:
+					logger.log(
+						'ACTION_FAILURE'
+						"({:>{}}/{}) Failed -- {} | {}",
+						filenum,
+						pad,
+						total,
+						result['filepath'],
+						result['reason']
+					)
 
 		if delete_on_success and 'song_id' in result:
 			try:
 				result['filepath'].unlink()
 			except Exception:
 				logger.warning(
-					f"Failed to remove {result['filepath']} after successful upload"
+					"Failed to remove {} after successful upload",
+					result['filepath']
 				)
