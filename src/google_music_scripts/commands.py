@@ -38,22 +38,9 @@ def do_delete(args):
 
 	logger.info("Found {} songs to delete", len(to_delete))
 
-	if args.dry_run:
-		if logger._min_level <= 10:
-			for song in to_delete:
-				title = song.get('title', "<empty>")
-				artist = song.get('artist', "<empty>")
-				album = song.get('album', "<empty>")
-				song_id = song['id']
-
-				logger.debug(
-					"{} -- {} -- {} ({})",
-					title,
-					artist,
-					album,
-					song_id
-				)
-	else:
+	if not to_delete:
+		logger.log('NORMAL', "No songs to delete")
+	elif not args.dry_run:
 		confirm = args.yes or input(
 			f"\nAre you sure you want to delete {len(to_delete)} song(s) from Google Music? (y/n) "
 		) in ("y", "Y")
@@ -91,6 +78,21 @@ def do_delete(args):
 				)
 		else:
 			logger.info("No songs deleted")
+	elif logger._min_level <= 15:
+		for song in to_delete:
+			title = song.get('title', "<empty>")
+			artist = song.get('artist', "<empty>")
+			album = song.get('album', "<empty>")
+			song_id = song['id']
+
+			logger.log(
+				'ACTION_SUCCESS',
+				"{} -- {} -- {} ({})",
+				title,
+				artist,
+				album,
+				song_id
+			)
 
 
 def do_download(args):
@@ -234,23 +236,23 @@ def do_download(args):
 
 	logger.info("Found {} songs to download", len(to_download))
 
-	if args.dry_run:
-		if logger._min_level <= 10:
-			for song in to_download:
-				title = song.get('title', "<title>")
-				artist = song.get('artist', "<artist>")
-				album = song.get('album', "<album>")
-				song_id = song['id']
-
-				logger.debug(
-					"{} -- {} -- {} ({})",
-					title,
-					artist,
-					album,
-					song_id
-				)
-	else:
+	if not args.dry_run:
 		download_songs(mm, to_download, template=args.output)
+	elif logger._min_level <= 15:
+		for song in to_download:
+			title = song.get('title', "<title>")
+			artist = song.get('artist', "<artist>")
+			album = song.get('album', "<album>")
+			song_id = song['id']
+
+			logger.log(
+				'ACTION_SUCCESS',
+				"{} -- {} -- {} ({})",
+				title,
+				artist,
+				album,
+				song_id
+			)
 
 
 def do_quota(args):
@@ -453,11 +455,7 @@ def do_upload(args):
 
 	logger.info("Found {} songs to upload", len(to_upload))
 
-	if args.dry_run:
-		if logger._min_level <= 10:
-			for song in to_upload:
-				logger.debug(song)
-	else:
+	if not args.dry_run:
 		upload_songs(
 			mm,
 			to_upload,
@@ -465,3 +463,9 @@ def do_upload(args):
 			no_sample=args.no_sample,
 			delete_on_success=args.delete_on_success
 		)
+	elif logger._min_level <= 15:
+		for song in to_upload:
+			logger.log(
+				'ACTION_SUCCESS',
+				song
+			)

@@ -963,7 +963,6 @@ def run():
 		check_args(parsed)
 
 		defaults = default_args(parsed)
-
 		args = merge_defaults(defaults, parsed)
 
 		configure_logging(
@@ -978,4 +977,4 @@ def run():
 
 		logger.log('NORMAL', "All done!")
 	except KeyboardInterrupt:
-		gms.exit(130, "Interrupted by user")
+		gms.exit(130, "\nInterrupted by user")

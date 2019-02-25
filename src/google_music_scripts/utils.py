@@ -6,7 +6,6 @@ __all__ = [
 ]
 
 import os
-import re
 from collections.abc import MutableMapping
 from pathlib import Path
 

@@ -13,49 +13,52 @@ from .utils import get_album_art_path
 
 
 def download_songs(mm, songs, template=None):
-	logger.log('NORMAL', "Downloading songs from Google Music")
+	if not songs:
+		logger.log('NORMAL', "No songs to download")
+	else:
+		logger.log('NORMAL', "Downloading songs from Google Music")
 
-	if not template:
-		template = Path.cwd()
+		if not template:
+			template = Path.cwd()
 
-	songnum = 0
-	total = len(songs)
-	pad = len(str(total))
+		songnum = 0
+		total = len(songs)
+		pad = len(str(total))
 
-	for song in songs:
-		songnum += 1
+		for song in songs:
+			songnum += 1
 
-		try:
-			audio, _ = mm.download(song)
-		except Exception as e:  # TODO: More specific exception.
-			logger.log(
-				'ACTION_FAILURE',
-				"({:>{}}/{}) Failed -- {} | {}",
-				songnum,
-				pad,
-				total,
-				song,
-				e
-			)
-		else:
-			tags = audio_metadata.loads(audio).tags
-			filepath = gm_utils.template_to_filepath(template, tags).with_suffix('.mp3')
-			if filepath.is_file():
-				filepath.unlink()
+			try:
+				audio, _ = mm.download(song)
+			except Exception as e:  # TODO: More specific exception.
+				logger.log(
+					'ACTION_FAILURE',
+					"({:>{}}/{}) Failed -- {} | {}",
+					songnum,
+					pad,
+					total,
+					song,
+					e
+				)
+			else:
+				tags = audio_metadata.loads(audio).tags
+				filepath = gm_utils.template_to_filepath(template, tags).with_suffix('.mp3')
+				if filepath.is_file():
+					filepath.unlink()
 
-			filepath.parent.mkdir(parents=True, exist_ok=True)
-			filepath.touch()
-			filepath.write_bytes(audio)
+				filepath.parent.mkdir(parents=True, exist_ok=True)
+				filepath.touch()
+				filepath.write_bytes(audio)
 
-			logger.log(
-				'ACTION_SUCCESS',
-				"({:>{}}/{}) Downloaded -- {} ({song['id']})",
-				songnum,
-				pad,
-				total,
-				filepath,
-				song['id']
-			)
+				logger.log(
+					'ACTION_SUCCESS',
+					"({:>{}}/{}) Downloaded -- {} ({song['id']})",
+					songnum,
+					pad,
+					total,
+					filepath,
+					song['id']
+				)
 
 
 def filter_google_dates(
@@ -311,49 +314,41 @@ def upload_songs(
 	no_sample=False,
 	delete_on_success=False
 ):
-	logger.log('NORMAL', "Uploading songs")
+	if not filepaths:
+		logger.log('NORMAL', "No songs to upload")
+	else:
+		logger.log('NORMAL', "Uploading songs")
 
-	filenum = 0
-	total = len(filepaths)
-	pad = len(str(total))
+		filenum = 0
+		total = len(filepaths)
+		pad = len(str(total))
 
-	for song in filepaths:
-		filenum += 1
+		for song in filepaths:
+			filenum += 1
 
-		album_art_path = get_album_art_path(song, album_art)
+			album_art_path = get_album_art_path(song, album_art)
 
-		result = mm.upload(
-			song,
-			album_art_path=album_art_path,
-			no_sample=no_sample
-		)
+			result = mm.upload(
+				song,
+				album_art_path=album_art_path,
+				no_sample=no_sample
+			)
 
-		if logger._min_level <= 15:
-			if result['reason'] == 'Uploaded':
-				logger.log(
-					'ACTION_SUCCESS',
-					"({:>{}}/{}) Uploaded -- {} ({})",
-					filenum,
-					pad,
-					total,
-					result['filepath'],
-					result['song_id']
-				)
-			elif result['reason'] == 'Matched':
-				logger.log(
-					'ACTION_SUCCESS',
-					"({:>{}}/{}) Matched -- {} ({})",
-					filenum,
-					pad,
-					total,
-					result['filepath'],
-					result['song_id']
-				)
-			else:
-				if 'song_id' in result:
+			if logger._min_level <= 15:
+				if result['reason'] == 'Uploaded':
 					logger.log(
 						'ACTION_SUCCESS',
-						"({:>{}}/{}) Already exists -- {} ({})",
+						"({:>{}}/{}) Uploaded -- {} ({})",
+						filenum,
+						pad,
+						total,
+						result['filepath'],
+						result['song_id']
+					)
+				elif result['reason'] == 'Matched':
+					logger.log(
+						'ACTION_SUCCESS',
+						"({:>{}}/{}) Matched -- {} ({})",
 						filenum,
 						pad,
 						total,
@@ -361,20 +356,31 @@ def upload_songs(
 						result['song_id']
 					)
 				else:
-					logger.log(
-						'ACTION_FAILURE',
-						"({:>{}}/{}) Failed -- {} | {}",
-						filenum,
-						pad,
-						total,
-						result['filepath'],
-						result['reason']
-					)
+					if 'song_id' in result:
+						logger.log(
+							'ACTION_SUCCESS',
+							"({:>{}}/{}) Already exists -- {} ({})",
+							filenum,
+							pad,
+							total,
+							result['filepath'],
+							result['song_id']
+						)
+					else:
+						logger.log(
+							'ACTION_FAILURE',
+							"({:>{}}/{}) Failed -- {} | {}",
+							filenum,
+							pad,
+							total,
+							result['filepath'],
+							result['reason']
+						)
 
-		if delete_on_success and 'song_id' in result:
-			try:
-				result['filepath'].unlink()
-			except Exception:
-				logger.warning(
-					"Failed to remove {} after successful upload", result['filepath']
-				)
+			if delete_on_success and 'song_id' in result:
+				try:
+					result['filepath'].unlink()
+				except Exception:
+					logger.warning(
+						"Failed to remove {} after successful upload", result['filepath']
+					)

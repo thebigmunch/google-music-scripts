@@ -167,5 +167,7 @@ def configure_logging(
 			log_file,
 			level=log_level,
 			format=LOG_FORMAT,
-			backtrace=False
+			backtrace=False,
+			encoding='utf8',
+			newline='\n'
 		)

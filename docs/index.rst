@@ -112,7 +112,7 @@ Output Templates
 ----------------
 
 The ``download`` command supports defining an output template.
-An output template uses patters, as described below, to use
+An output template uses patterns, as described below, to use
 values from metadata fields in the output.
 If a field for a pattern does not exist in the song,
 the pattern remains in the download filepath.
