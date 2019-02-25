@@ -1,6 +1,6 @@
 __all__ = [
 	'DictMixin',
-	'convert_cygwin_path',
+	'convert_unix_path',
 	'get_album_art_path',
 	'template_to_base_path',
 ]
@@ -13,7 +13,7 @@ from pathlib import Path
 import google_music_utils as gm_utils
 import pprintpp
 
-CYGWIN_PATH_RE = re.compile(r'(/(cygdrive/)?)(.*)')
+from .constants import UNIX_PATH_RE
 
 
 class DictMixin(MutableMapping):
@@ -63,8 +63,8 @@ class DictMixin(MutableMapping):
 		return self.__dict__.values()
 
 
-def convert_cygwin_path(filepath):
-	"""Convert Unix filepath string from Cygwin to Windows format.
+def convert_unix_path(filepath):
+	"""Convert Unix filepath string from Cygwin et al to Windows format.
 
 	Parameters:
 		filepath (str): A filepath string.
@@ -77,7 +77,7 @@ def convert_cygwin_path(filepath):
 		subprocess.CalledProcessError
 	"""
 
-	match = CYGWIN_PATH_RE.match(filepath)
+	match = UNIX_PATH_RE.match(filepath)
 	if not match:
 		return Path(filepath.replace('/', r'\\'))
 

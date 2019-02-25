@@ -20,7 +20,7 @@ from .commands import (
 )
 from .config import configure_logging, get_defaults
 from .constants import UNIX_PATH_RE
-from .utils import DictMixin, convert_cygwin_path
+from .utils import DictMixin, convert_unix_path
 
 DATETIME_RE = re.compile(
 	r"(?P<year>\d{4})"
@@ -106,7 +106,7 @@ class SubcommandHelpFormatter(UsageHelpFormatter):
 # This type converts Unix-style paths to Windows-style paths in this case.
 def custom_path(value):
 	if os.name == 'nt' and UNIX_PATH_RE.match(str(value)):
-		value = Path(convert_cygwin_path(str(value)))
+		value = Path(convert_unix_path(str(value)))
 
 	value = Path(value)
 
@@ -140,7 +140,7 @@ def split_album_art_paths(value):
 
 		for val in value:
 			if os.name == 'nt' and UNIX_PATH_RE.match(val.strip()):
-				paths.append(convert_cygwin_path(val.strip()))
+				paths.append(convert_unix_path(val.strip()))
 			else:
 				paths.append(Path(val))
 
@@ -811,13 +811,17 @@ def check_args(args):
 		option in args
 		for option in ['use_hash', 'no_use_hash']
 	):
-		raise ValueError("Use one of --use-hash/--no-use-hash', not both.")
+		raise ValueError(
+			"Use one of --use-hash/--no-use-hash', not both."
+		)
 
 	if all(
 		option in args
 		for option in ['use_metadata', 'no_use_metadata']
 	):
-		raise ValueError("Use one of --use-metadata/--no-use-metadata', not both.")
+		raise ValueError(
+			"Use one of --use-metadata/--no-use-metadata', not both."
+		)
 
 
 def default_args(args):
@@ -919,7 +923,7 @@ def default_args(args):
 			'no_use_metadata',
 		]:
 			defaults[k] = v
-			defaults[f"{k.replace('no_', '')}"] = not v
+			defaults[k.replace('no_', '')] = not v
 		elif k.startswith(('created', 'modified')):
 			if k.endswith('in'):
 				defaults[k] = time_period(v, in_=True)
@@ -955,6 +959,8 @@ def run():
 			command = parsed._command
 		else:
 			gms.parse_args(['-h'])
+
+		check_args(parsed)
 
 		defaults = default_args(parsed)
 
