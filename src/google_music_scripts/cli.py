@@ -41,17 +41,6 @@ DATETIME_RE = re.compile(
 )
 FILTER_RE = re.compile(r'(([+-]+)?(.*?)\[(.*?)\])', re.I)
 
-DISPATCH = {
-	'del': do_delete,
-	'delete': do_delete,
-	'down': do_download,
-	'download': do_download,
-	'quota': do_quota,
-	'search': do_search,
-	'up': do_upload,
-	'upload': do_upload,
-}
-
 
 @attrs(slots=True, frozen=True)
 class FilterCondition:
@@ -701,6 +690,7 @@ delete_command = subcommands.add_parser(
 	],
 	add_help=False
 )
+delete_command.set_defaults(func=do_delete)
 
 
 ############
@@ -730,6 +720,7 @@ download_command = subcommands.add_parser(
 	],
 	add_help=False
 )
+download_command.set_defaults(func=do_download)
 
 
 #########
@@ -750,6 +741,7 @@ quota_command = subcommands.add_parser(
 	],
 	add_help=False
 )
+quota_command.set_defaults(func=do_quota)
 
 
 ##########
@@ -771,6 +763,7 @@ search_command = subcommands.add_parser(
 	],
 	add_help=False
 )
+search_command.set_defaults(func=do_search)
 
 
 ##########
@@ -800,6 +793,7 @@ upload_command = subcommands.add_parser(
 	],
 	add_help=False
 )
+upload_command.set_defaults(func=do_upload)
 
 
 def parse_args():
@@ -955,9 +949,7 @@ def run():
 	try:
 		parsed = parse_args()
 
-		if parsed.get('_command'):
-			command = parsed._command
-		else:
+		if parsed._command is None:
 			gms.parse_args(['-h'])
 
 		check_args(parsed)
@@ -973,7 +965,7 @@ def run():
 			log_to_file=args.log_to_file
 		)
 
-		DISPATCH[command](args)
+		args.func(args)
 
 		logger.log('NORMAL', "All done!")
 	except KeyboardInterrupt:
