@@ -6,7 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased](https://github.com/thebigmunch/google-music-scripts/tree/master)
 
-[Commits](https://github.com/thebigmunch/google-music-scripts/compare/4.0.1...master)
+[Commits](https://github.com/thebigmunch/google-music-scripts/compare/4.1.0...master)
+
+
+## [4.1.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/4.1.0) (2019-07-22)
+
+[Commits](https://github.com/thebigmunch/google-music-scripts/compare/4.0.1...4.1.0)
 
 ### Added
 
