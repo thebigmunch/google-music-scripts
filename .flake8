@@ -9,6 +9,7 @@ exclude =
 	docs
 enable-plugins =
 	builtins
+	comprehensions
 	import_order
 application-import-names =
 	google_music_scripts
