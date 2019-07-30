@@ -28,6 +28,14 @@ def download_songs(mm, songs, template=None):
 		for song in songs:
 			songnum += 1
 
+			logger.trace(
+				"Downloading -- {} - {} - {} ({})",
+				song.get('title', "<title>"),
+				song.get('artist', "<artist>"),
+				song.get('album', "<album>"),
+				song['id']
+			)
+
 			try:
 				audio, _ = mm.download(song)
 			except Exception as e:  # TODO: More specific exception.
@@ -325,6 +333,11 @@ def upload_songs(
 
 		for song in filepaths:
 			filenum += 1
+
+			logger.trace(
+				"Uploading -- {}",
+				song
+			)
 
 			album_art_path = get_album_art_path(song, album_art)
 
