@@ -144,6 +144,11 @@ def time_period(
 	before=False,
 	after=False
 ):
+	if dt_string == 'today':
+		dt_string = pendulum.today().to_date_string()
+	elif dt_string == 'yesterday':
+		dt_string = pendulum.yesterday().to_date_string()
+
 	match = DATETIME_RE.match(dt_string)
 
 	if not match or match['year'] is None:

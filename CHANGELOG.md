@@ -13,6 +13,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/4.1.0...4.1.1)
 
+### Added
+
+* Ability to use 'today' and 'yesterday' in date filter options.
+
 ### Fixed
 
 * Fix audio-metadata dependency version.
