@@ -295,17 +295,11 @@ def get_local_songs(
 					and not _exclude_paths(path, exclude_paths)
 					and not _exclude_regexes(path, exclude_regexes)
 				):
-					with path.open('rb') as f:
-						if audio_metadata.determine_format(
-							f.read(4), extension=path.suffix
-						) is not None:
-							local_songs.append(path)
+					if audio_metadata.determine_format(path) is not None:
+						local_songs.append(path)
 		elif filepath.is_file():
-			with filepath.open('rb') as f:
-				if audio_metadata.determine_format(
-					f.read(4), extension=filepath.suffix
-				) is not None:
-					local_songs.append(filepath)
+			if audio_metadata.determine_format(filepath) is not None:
+				local_songs.append(filepath)
 
 	logger.info("Found {} local songs", len(local_songs))
 
