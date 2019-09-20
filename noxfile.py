@@ -10,13 +10,13 @@ py38 = '3.8'
 ON_TRAVIS = 'TRAVIS' in os.environ
 
 
-@nox.session(python=py37)
+@nox.session(reuse_venv=True)
 def lint(session):
 	session.install('.[lint]')
 	session.run('flake8', 'src/')
 
 
-@nox.session(python=py37)
+@nox.session(reuse_venv=True)
 def doc(session):
 	shutil.rmtree('docs/_build', ignore_errors=True)
 	session.install('.[doc]')
