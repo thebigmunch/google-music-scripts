@@ -6,11 +6,11 @@ from google_music_proto.musicmanager.utils import generate_client_id
 from loguru import logger
 from more_itertools import first_true
 from natsort import natsorted
+from tbm_utils import filter_filepaths_by_dates
 
 from .core import (
 	download_songs,
 	filter_google_dates,
-	filter_local_dates,
 	get_google_songs,
 	get_local_songs,
 	upload_songs,
@@ -146,47 +146,59 @@ def do_download(args):
 	)
 
 	missing_songs = []
+	existing_songs = []
 	if args.use_hash:
-		logger.log('NORMAL', "Comparing hashes")
+		if google_songs and local_songs:
+			logger.log('NORMAL', "Comparing hashes")
 
-		existing_songs = []
-		google_client_id_map = {
-			song.get('clientId'): song
-			for song in mc_songs
-		}
-		local_client_ids = {generate_client_id(song) for song in local_songs}
-		for client_id, mc_song in google_client_id_map.items():
-			song = first_true(
-				(song for song in google_songs),
-				pred=lambda song: song.get('id') == mc_song.get('id')
-			)
-			if client_id not in local_client_ids:
-				missing_songs.append(song)
-			else:
-				existing_songs.append(song)
-
-		logger.info("Found {} songs already exist by audio hash", len(existing_songs))
-
-		if logger._min_level <= 5:
-			for song in existing_songs:
-				title = song.get('title', "<title>")
-				artist = song.get('artist', "<artist>")
-				album = song.get('album', "<album>")
-				song_id = song['id']
-
-				logger.trace(
-					"{} -- {} -- {} ({})",
-					title,
-					artist,
-					album,
-					song_id
+			google_client_id_map = {
+				mc_song.get('clientId'): mc_song
+				for mc_song in mc_songs
+			}
+			local_client_ids = {generate_client_id(song) for song in local_songs}
+			for client_id, mc_song in google_client_id_map.items():
+				song = first_true(
+					(song for song in google_songs),
+					pred=lambda song: song.get('id') == mc_song.get('id')
 				)
+
+				if song is not None:
+					if client_id not in local_client_ids:
+						missing_songs.append(song)
+					else:
+						existing_songs.append(song)
+
+			logger.info("Found {} songs already exist by audio hash", len(existing_songs))
+
+			if logger._min_level <= 5:
+				for song in existing_songs:
+					title = song.get('title', "<title>")
+					artist = song.get('artist', "<artist>")
+					album = song.get('album', "<album>")
+					song_id = song['id']
+
+					logger.trace(
+						"{} -- {} -- {} ({})",
+						title,
+						artist,
+						album,
+						song_id
+					)
+		else:
+			missing_songs = google_songs
+
+			if not google_songs and not local_songs:
+				logger.log('NORMAL', "No songs to compare hashes.")
+			elif not google_songs:
+				logger.log('NORMAL', "No Google songs to compare hashes.")
+			elif not local_songs:
+				logger.log('NORMAL', "No local songs to compare hashes.")
 
 	if args.use_metadata:
 		if args.use_hash:
 			google_songs = missing_songs
 
-		if google_songs:
+		if google_songs and local_songs:
 			logger.log('NORMAL', "Comparing metadata")
 
 			missing_songs = natsorted(
@@ -226,6 +238,13 @@ def do_download(args):
 						album,
 						song_id
 					)
+		else:
+			if not google_songs and not local_songs:
+				logger.log('NORMAL', "No songs to compare metadata.")
+			elif not google_songs:
+				logger.log('NORMAL', "No Google songs to compare metadata.")
+			elif not local_songs:
+				logger.log('NORMAL', "No local songs to compare metadata.")
 
 	if not args.use_hash and not args.use_metadata:
 		missing_songs = google_songs
@@ -383,7 +402,7 @@ def do_upload(args):
 			'modified_after',
 		]
 	):
-		local_songs = filter_local_dates(
+		local_songs = filter_filepaths_by_dates(
 			local_songs,
 			created_in=args.get('created_in'),
 			created_on=args.get('created_on'),

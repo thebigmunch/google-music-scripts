@@ -1,6 +1,4 @@
 import math
-import platform
-import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -8,6 +6,7 @@ import audio_metadata
 import google_music_utils as gm_utils
 import pendulum
 from loguru import logger
+from tbm_utils import get_filepaths
 
 from .utils import get_album_art_path
 
@@ -60,7 +59,7 @@ def download_songs(mm, songs, template=None):
 
 				logger.log(
 					'ACTION_SUCCESS',
-					"({:>{}}/{}) Downloaded -- {} ({song['id']})",
+					"({:>{}}/{}) Downloaded -- {} ({})",
 					songnum,
 					pad,
 					total,
@@ -81,7 +80,6 @@ def filter_google_dates(
 	modified_before=None,
 	modified_after=None
 ):
-
 	matched_songs = songs
 
 	def _dt_from_gm_timestamp(gm_timestamp):
@@ -122,68 +120,9 @@ def filter_google_dates(
 	return list(matched_songs)
 
 
-def filter_local_dates(
-	filepaths,
-	*,
-	created_in=None,
-	created_on=None,
-	created_before=None,
-	created_after=None,
-	modified_in=None,
-	modified_on=None,
-	modified_before=None,
-	modified_after=None
-):
-	matched_filepaths = filepaths
-
-	def _match_created_date(filepaths, period):
-		for filepath in filepaths:
-			file_stat = filepath.stat()
-
-			if platform.system() == 'Windows':
-				created_timestamp = file_stat.st_ctime
-			else:
-				try:
-					created_timestamp = file_stat.st_birthtime
-				except AttributeError:
-					# Settle for modified time on *nix systems
-					# not supporting birth time.
-					created_timestamp = file_stat.st_mtime
-
-			if pendulum.from_timestamp(created_timestamp) in period:
-				yield filepath
-
-	def _match_modified_date(filepaths, period):
-		for filepath in filepaths:
-			modified_timestamp = filepath.stat().st_mtime
-
-			if pendulum.from_timestamp(modified_timestamp) in period:
-				yield filepath
-
-	for period in [
-		created_in,
-		created_on,
-		created_before,
-		created_after,
-	]:
-		if period is not None:
-			matched_filepaths = _match_created_date(matched_filepaths, period)
-
-	for period in [
-		modified_in,
-		modified_on,
-		modified_before,
-		modified_after,
-	]:
-		if period is not None:
-			matched_filepaths = _match_modified_date(matched_filepaths, period)
-
-	return list(matched_filepaths)
-
-
 def filter_metadata(songs, filters):
 	if filters:
-		logger.log('NORMAL', "Filtering songs")
+		logger.log('NORMAL', "Filtering songs by metadata")
 		matched_songs = []
 
 		for filter_ in filters:
@@ -250,7 +189,7 @@ def get_google_songs(client, *, filters=None):
 
 
 def get_local_songs(
-	filepaths,
+	paths,
 	*,
 	filters=None,
 	max_depth=math.inf,
@@ -260,46 +199,17 @@ def get_local_songs(
 ):
 	logger.log('NORMAL', "Loading local songs")
 
-	def _exclude_paths(path, exclude_paths):
-		return any(
-			str(Path(exclude_path)) in str(path)
-			for exclude_path in exclude_paths
+	local_songs = [
+		filepath
+		for filepath in get_filepaths(
+			paths,
+			max_depth=max_depth,
+			exclude_paths=exclude_paths,
+			exclude_regexes=exclude_regexes,
+			exclude_globs=exclude_globs
 		)
-
-	def _exclude_regexes(path, exclude_regexes):
-		return any(
-			re.search(regex, str(path))
-			for regex in exclude_regexes
-		)
-
-	local_songs = []
-	for filepath in filepaths:
-		if (
-			_exclude_paths(filepath, exclude_paths)
-			or _exclude_regexes(filepath, exclude_regexes)
-		):
-			continue
-
-		if filepath.is_dir():
-			start_level = len(filepath.parts)
-
-			exclude_files = set()
-			for exclude_glob in exclude_globs:
-				exclude_files |= set(filepath.rglob(exclude_glob))
-
-			for path in filepath.glob('**/*'):
-				if (
-					path.is_file()
-					and len(path.parent.parts) - start_level <= max_depth
-					and path not in exclude_files
-					and not _exclude_paths(path, exclude_paths)
-					and not _exclude_regexes(path, exclude_regexes)
-				):
-					if audio_metadata.determine_format(path) is not None:
-						local_songs.append(path)
-		elif filepath.is_file():
-			if audio_metadata.determine_format(filepath) is not None:
-				local_songs.append(filepath)
+		if audio_metadata.determine_format(filepath) is not None
+	]
 
 	logger.info("Found {} local songs", len(local_songs))
 
