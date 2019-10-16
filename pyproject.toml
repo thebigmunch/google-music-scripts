@@ -20,7 +20,7 @@ homepage = "https://github.com/thebigmunch/google-music-scripts"
 python = "^3.6"
 
 appdirs = "^1.0"
-attrs = ">=18.2,<19.3"
+attrs = ">=18.2,<19.4"
 audio-metadata = "^0.5"
 google-music = "^3.0"
 google-music-proto = "^2.4"
