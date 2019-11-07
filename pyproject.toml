@@ -21,7 +21,7 @@ python = "^3.6"
 
 appdirs = "^1.0"
 attrs = ">=18.2,<19.4"
-audio-metadata = "^0.5"
+audio-metadata = "^0.6"
 google-music = "^3.0"
 google-music-proto = "^2.4"
 google-music-utils = "^2.1"
