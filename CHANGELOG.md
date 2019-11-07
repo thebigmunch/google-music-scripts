@@ -8,14 +8,16 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/4.1.0...master)
 
+### Added
+
+* Re-add download/upload progress messages at trace level.
+* Ability to use 'today' and 'yesterday' in date filter options.
+
+
 
 ## [4.1.1](https://github.com/thebigmunch/google-music-scripts/releases/tag/4.1.1) (2019-07-22)
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/4.1.0...4.1.1)
-
-### Added
-
-* Ability to use 'today' and 'yesterday' in date filter options.
 
 ### Fixed
 
