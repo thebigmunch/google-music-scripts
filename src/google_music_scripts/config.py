@@ -17,7 +17,7 @@ LOG_DEBUG_FORMAT = LOG_FORMAT
 
 logger.level('NORMAL', no=25, color="<green>")
 logger.level('INFO', no=20, color="<green><bold>")
-logger.level('ACTION_FAILURE', no=15, color="<red>")
+logger.level('ACTION_FAILURE', no=16, color="<red>")
 logger.level('ACTION_SUCCESS', no=15, color="<cyan>")
 
 VERBOSITY_LOG_LEVELS = {
@@ -26,9 +26,10 @@ VERBOSITY_LOG_LEVELS = {
 	2: 30,
 	3: 25,
 	4: 20,
-	5: 15,
-	6: 10,
-	7: 5,
+	5: 16,
+	6: 15,
+	7: 10,
+	8: 5,
 }
 
 

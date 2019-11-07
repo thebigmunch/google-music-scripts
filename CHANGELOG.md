@@ -13,6 +13,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 * Re-add download/upload progress messages at trace level.
 * Ability to use 'today' and 'yesterday' in date filter options.
 
+### Changed
+
+* Failed action messages now require less
+	verbosity than successful action messages.
 
 
 ## [4.1.1](https://github.com/thebigmunch/google-music-scripts/releases/tag/4.1.1) (2019-07-22)
