@@ -40,6 +40,7 @@ flake8-import-order-tbm = { version = "^1.0", optional = true }
 nox = { version = "^2019", optional = true }
 sphinx = { version= "^2.0", optional = true}
 sphinx-argparse = { version = "^0.2", optional = true }
+sphinx-material = { version= "0.*", optional = true }
 
 [tool.poetry.extras]
 dev = [
@@ -50,18 +51,20 @@ dev = [
 	"flake8-import-order-tbm",
 	"nox",
 	"sphinx",
-	"sphinx-argparse"
+	"sphinx-argparse",
+	"sphinx-material",
 ]
 doc = [
 	"sphinx",
-	"sphinx-argparse"
+	"sphinx-argparse",
+	"sphinx-material",
 ]
 lint = [
 	"flake8",
 	"flake8-builtins",
 	"flake8-comprehensions",
 	"flake8-import-order",
-	"flake8-import-order-tbm"
+	"flake8-import-order-tbm",
 ]
 
 [tool.poetry.scripts]
