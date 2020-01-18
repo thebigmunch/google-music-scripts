@@ -78,7 +78,7 @@ def do_delete(args):
 				)
 		else:
 			logger.info("No songs deleted")
-	elif logger._min_level <= 15:
+	elif logger._core.min_level <= 15:
 		for song in to_delete:
 			title = song.get('title', "<empty>")
 			artist = song.get('artist', "<empty>")
@@ -170,7 +170,7 @@ def do_download(args):
 
 			logger.info("Found {} songs already exist by audio hash", len(existing_songs))
 
-			if logger._min_level <= 5:
+			if logger._core.min_level <= 5:
 				for song in existing_songs:
 					title = song.get('title', "<title>")
 					artist = song.get('artist', "<artist>")
@@ -224,7 +224,7 @@ def do_download(args):
 				len(existing_songs)
 			)
 
-			if logger._min_level <= 5:
+			if logger._core.min_level <= 5:
 				for song in existing_songs:
 					title = song.get('title', "<title>")
 					artist = song.get('artist', "<artist>")
@@ -257,7 +257,7 @@ def do_download(args):
 
 	if not args.dry_run:
 		download_songs(mm, to_download, template=args.output)
-	elif logger._min_level <= 15:
+	elif logger._core.min_level <= 15:
 		for song in to_download:
 			title = song.get('title', "<title>")
 			artist = song.get('artist', "<artist>")
@@ -428,7 +428,7 @@ def do_upload(args):
 
 		logger.info("Found {} songs already exist by audio hash", len(existing_songs))
 
-		if logger._min_level <= 5:
+		if logger._core.min_level <= 5:
 			for song in natsorted(existing_songs):
 				logger.trace(song)
 
@@ -461,7 +461,7 @@ def do_upload(args):
 
 			logger.info("Found {} songs already exist by metadata", len(existing_songs))
 
-			if logger._min_level <= 5:
+			if logger._core.min_level <= 5:
 				for song in existing_songs:
 					logger.trace(song)
 
@@ -482,7 +482,7 @@ def do_upload(args):
 			no_sample=args.no_sample,
 			delete_on_success=args.delete_on_success
 		)
-	elif logger._min_level <= 15:
+	elif logger._core.min_level <= 15:
 		for song in to_upload:
 			logger.log(
 				'ACTION_SUCCESS',

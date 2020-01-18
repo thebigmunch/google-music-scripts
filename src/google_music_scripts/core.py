@@ -251,7 +251,7 @@ def upload_songs(
 				no_sample=no_sample
 			)
 
-			if logger._min_level <= 15:
+			if logger._core.min_level <= 15:
 				if result['reason'] == 'Uploaded':
 					logger.log(
 						'ACTION_SUCCESS',
