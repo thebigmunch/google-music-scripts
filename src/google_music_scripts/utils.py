@@ -15,7 +15,7 @@ def get_album_art_path(song, album_art_paths):
 		for path in album_art_paths:
 			if (
 				path.is_absolute()
-				and path.isfile()
+				and path.is_file()
 			):
 				album_art_path = path
 				break
