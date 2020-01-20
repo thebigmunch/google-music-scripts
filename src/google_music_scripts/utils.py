@@ -34,7 +34,10 @@ def template_to_base_path(template, google_songs):
 	path = Path(template)
 
 	if (
-		path == Path.cwd()
+		(
+			path == Path.cwd()
+			or path == Path()
+		)
 		or path == Path('%suggested%')
 	):
 		base_path = Path.cwd()
