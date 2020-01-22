@@ -1,13 +1,6 @@
-import os
 import shutil
 
 import nox
-
-ON_TRAVIS = 'TRAVIS' in os.environ
-
-py36 = '3.6'
-py37 = '3.7'
-py38 = '3.8'
 
 nox.options.reuse_existing_virtualenvs = True
 

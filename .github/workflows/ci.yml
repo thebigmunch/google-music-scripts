@@ -1,0 +1,21 @@
+---
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: excitedleigh/setup-nox@0.1.0
+      - run: nox -s lint
+
+  doc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: excitedleigh/setup-nox@0.1.0
+      - run: nox -s doc
