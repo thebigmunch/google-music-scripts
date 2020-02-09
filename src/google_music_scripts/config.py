@@ -83,8 +83,8 @@ def configure_logging(
 
 	if verbosity < 0:
 		verbosity = 0
-	elif verbosity > 7:
-		verbosity = 7
+	elif verbosity > 8:
+		verbosity = 8
 
 	log_level = VERBOSITY_LOG_LEVELS[verbosity]
 
