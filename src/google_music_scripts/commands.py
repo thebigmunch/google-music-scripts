@@ -68,7 +68,7 @@ def do_delete(args):
 					song_id
 				)
 
-				mc.song_delete(song)
+				mc.songs_delete(song)
 
 				logger.info(
 					"Deleted {:>{}}/{}",

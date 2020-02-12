@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
 ### Fixed
 
 * Incorrect max verbosity check.
+* Method name: ``song_delete`` -> ``songs_delete``.
 
 
 ## [4.2.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/4.2.0) (2019-11-07)
