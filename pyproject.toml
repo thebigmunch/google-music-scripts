@@ -29,7 +29,7 @@ loguru = "0.4.*"
 pendulum = "^2.0"
 pprintpp = "0.*"
 natsort = ">=5.0,<7.0"
-tbm-utils = "^1.0.0"
+tbm-utils = "^2.0"
 tomlkit = "^0.5"
 
 flake8 = { version = "^3.5", optional = true }

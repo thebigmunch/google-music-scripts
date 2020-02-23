@@ -111,30 +111,34 @@ def do_download(args):
 	filepaths = [base_path, *args.include]
 
 	mc_songs = get_google_songs(mc, filters=args.filters)
-	if any(
-		args.get(option)
+
+	creation_dates = [
+		args[option]
 		for option in [
 			'created_in',
 			'created_on',
 			'created_before',
 			'created_after',
+		]
+		if option in args
+	]
+
+	modification_dates = [
+		args[option]
+		for option in [
 			'modified_in',
 			'modified_on',
 			'modified_before',
 			'modified_after',
 		]
-	):
-		mc_songs = filter_google_dates(
-			mc_songs,
-			created_in=args.get('created_in'),
-			created_on=args.get('created_on'),
-			created_before=args.get('created_before'),
-			created_after=args.get('created_after'),
-			modified_in=args.get('modified_in'),
-			modified_on=args.get('modified_on'),
-			modified_before=args.get('modified_before'),
-			modified_after=args.get('modified_after')
-		)
+		if option in args
+	]
+
+	mc_songs = filter_google_dates(
+		mc_songs,
+		creation_dates=creation_dates,
+		modification_dates=modification_dates,
+	)
 
 	local_songs = get_local_songs(
 		filepaths,
@@ -299,30 +303,33 @@ def do_search(args):
 
 	search_results = get_google_songs(mc, filters=args.filters)
 
-	if any(
-		args.get(option)
+	creation_dates = [
+		args[option]
 		for option in [
 			'created_in',
 			'created_on',
 			'created_before',
 			'created_after',
+		]
+		if option in args
+	]
+
+	modification_dates = [
+		args[option]
+		for option in [
 			'modified_in',
 			'modified_on',
 			'modified_before',
 			'modified_after',
 		]
-	):
-		search_results = filter_google_dates(
-			search_results,
-			created_in=args.get('created_in'),
-			created_on=args.get('created_on'),
-			created_before=args.get('created_before'),
-			created_after=args.get('created_after'),
-			modified_in=args.get('modified_in'),
-			modified_on=args.get('modified_on'),
-			modified_before=args.get('modified_before'),
-			modified_after=args.get('modified_after')
-		)
+		if option in args
+	]
+
+	search_results = filter_google_dates(
+		search_results,
+		creation_dates=creation_dates,
+		modification_dates=modification_dates,
+	)
 
 	search_results = natsorted(
 		search_results,
@@ -389,30 +396,33 @@ def do_upload(args):
 		exclude_globs=args.exclude_globs
 	)
 
-	if any(
-		args.get(option)
+	creation_dates = [
+		args[option]
 		for option in [
 			'created_in',
 			'created_on',
 			'created_before',
 			'created_after',
+		]
+		if option in args
+	]
+
+	modification_dates = [
+		args[option]
+		for option in [
 			'modified_in',
 			'modified_on',
 			'modified_before',
 			'modified_after',
 		]
-	):
-		local_songs = filter_filepaths_by_dates(
-			local_songs,
-			created_in=args.get('created_in'),
-			created_on=args.get('created_on'),
-			created_before=args.get('created_before'),
-			created_after=args.get('created_after'),
-			modified_in=args.get('modified_in'),
-			modified_on=args.get('modified_on'),
-			modified_before=args.get('modified_before'),
-			modified_after=args.get('modified_after')
-		)
+		if option in args
+	]
+
+	local_songs = filter_filepaths_by_dates(
+		local_songs,
+		creation_dates=creation_dates,
+		modification_dates=modification_dates,
+	)
 
 	missing_songs = []
 	if args.use_hash:

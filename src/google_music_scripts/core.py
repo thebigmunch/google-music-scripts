@@ -71,14 +71,8 @@ def download_songs(mm, songs, template=None):
 def filter_google_dates(
 	songs,
 	*,
-	created_in=None,
-	created_on=None,
-	created_before=None,
-	created_after=None,
-	modified_in=None,
-	modified_on=None,
-	modified_before=None,
-	modified_after=None
+	creation_dates=None,
+	modification_dates=None,
 ):
 	matched_songs = songs
 
@@ -99,22 +93,12 @@ def filter_google_dates(
 			if _dt_from_gm_timestamp(song['lastModifiedTimestamp']) in period
 		)
 
-	for period in [
-		created_in,
-		created_on,
-		created_before,
-		created_after,
-	]:
-		if period is not None:
+	if creation_dates:
+		for period in creation_dates:
 			matched_songs = _match_created_date(matched_songs, period)
 
-	for period in [
-		modified_in,
-		modified_on,
-		modified_before,
-		modified_after,
-	]:
-		if period is not None:
+	if modification_dates:
+		for period in modification_dates:
 			matched_songs = _match_modified_date(matched_songs, period)
 
 	return list(matched_songs)
