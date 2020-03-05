@@ -192,7 +192,13 @@ def get_local_songs(
 			exclude_regexes=exclude_regexes,
 			exclude_globs=exclude_globs
 		)
-		if audio_metadata.determine_format(filepath) is not None
+		if audio_metadata.determine_format(filepath) in [
+			audio_metadata.FLAC,
+			audio_metadata.MP3,
+			audio_metadata.OggOpus,
+			audio_metadata.OggVorbis,
+			audio_metadata.WAV,
+		]
 	]
 
 	logger.info("Found {} local songs", len(local_songs))

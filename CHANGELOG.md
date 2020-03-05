@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/4.2.1...master)
 
+### Added
+
+* Support for uploading Ogg Vorbis and Ogg Opus files.
+
 
 ## [4.2.1](https://github.com/thebigmunch/google-music-scripts/releases/tag/4.2.1) (2020-02-23)
 
