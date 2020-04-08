@@ -26,7 +26,7 @@ google-music = "^3.4"
 google-music-proto = "^2.8"
 google-music-utils = "^2.1"
 loguru = "0.4.*"
-pendulum = "^2.0"
+pendulum = ">=2.0,<=3.0,!=2.0.5,!=2.1.0"  # Work around https://github.com/sdispater/pendulum/issues/454
 pprintpp = "0.*"
 natsort = ">=5.0,<7.0"
 tbm-utils = "^2.3"
