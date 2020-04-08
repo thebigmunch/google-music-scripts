@@ -197,7 +197,7 @@ def get_local_songs(
 			audio_metadata.MP3,
 			audio_metadata.OggOpus,
 			audio_metadata.OggVorbis,
-			audio_metadata.WAV,
+			audio_metadata.WAVE,
 		]
 	]
 
