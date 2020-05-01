@@ -1,6 +1,18 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+    tags-ignore:
+      - '**'
+  pull_request:
+    branches:
+      - master
+  # Allow rebuilds via API.
+  repository_dispatch:
+    types:
+      - rerun
 
 jobs:
   lint:
