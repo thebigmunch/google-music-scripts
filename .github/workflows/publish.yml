@@ -1,0 +1,19 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - uses: dschep/install-poetry-action@v1.3
+        with:
+          create_virtualenvs: true
+      - run: poetry publish --build --username __token__ --password ${{ secrets.PYPI_TOKEN }}
