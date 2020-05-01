@@ -235,11 +235,18 @@ def upload_songs(
 
 			album_art_path = get_album_art_path(song, album_art)
 
-			result = mm.upload(
-				song,
-				album_art_path=album_art_path,
-				no_sample=no_sample
-			)
+			try:
+				result = mm.upload(
+					song,
+					album_art_path=album_art_path,
+					no_sample=no_sample
+				)
+			except Exception as e:  # TODO: More specific exception.
+				result = {
+					'filepath': song,
+					'success': False,
+					'reason': e,
+				}
 
 			if logger._core.min_level <= 15:
 				if result['reason'] == 'Uploaded':

@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/4.4.0...master)
 
+### Changed
+
+* Catch exceptions from google_music.MusicManager.upload call.
+
 
 ## [4.4.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/4.4.0) (2020-04-08)
 
