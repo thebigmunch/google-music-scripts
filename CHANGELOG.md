@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [Commits](https://github.com/thebigmunch/google-music-scripts/compare/4.5.0...master)
 
+### Changed
+
+* Silence warnings from audio-metadata.
+
 
 ## [4.5.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/4.5.0) (2020-05-01)
 

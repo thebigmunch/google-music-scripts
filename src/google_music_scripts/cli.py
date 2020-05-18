@@ -1,9 +1,11 @@
 import argparse
 import math
 import re
+import warnings
 from pathlib import Path
 
 from attr import attrib, attrs
+from audio_metadata import AudioMetadataWarning
 from loguru import logger
 from tbm_utils import (
 	Namespace,
@@ -593,6 +595,11 @@ def default_args(args):
 
 
 def run():
+	warnings.simplefilter(
+		'ignore',
+		category=AudioMetadataWarning,
+	)
+
 	try:
 		parsed = parse_args(gms)
 
