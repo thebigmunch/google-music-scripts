@@ -48,24 +48,36 @@ def download_songs(mm, songs, template=None):
 					e
 				)
 			else:
-				tags = audio_metadata.loads(audio).tags
-				filepath = gm_utils.template_to_filepath(template, tags).with_suffix('.mp3')
-				if filepath.is_file():
-					filepath.unlink()
+				try:
+					tags = audio_metadata.loads(audio).tags
+				except audio_metadata.AudioMetadataException as e:
+					logger.log(
+						'ACTION_FAILURE',
+						"({:>{}}/{}) Failed -- {} | {}",
+						songnum,
+						pad,
+						total,
+						song,
+						e
+					)
+				else:
+					filepath = gm_utils.template_to_filepath(template, tags).with_suffix('.mp3')
+					if filepath.is_file():
+						filepath.unlink()
 
-				filepath.parent.mkdir(parents=True, exist_ok=True)
-				filepath.touch()
-				filepath.write_bytes(audio)
+					filepath.parent.mkdir(parents=True, exist_ok=True)
+					filepath.touch()
+					filepath.write_bytes(audio)
 
-				logger.log(
-					'ACTION_SUCCESS',
-					"({:>{}}/{}) Downloaded -- {} ({})",
-					songnum,
-					pad,
-					total,
-					filepath,
-					song['id']
-				)
+					logger.log(
+						'ACTION_SUCCESS',
+						"({:>{}}/{}) Downloaded -- {} ({})",
+						songnum,
+						pad,
+						total,
+						filepath,
+						song['id']
+					)
 
 
 def filter_google_dates(

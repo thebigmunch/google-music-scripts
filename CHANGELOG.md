@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
 ### Changed
 
 * Silence warnings from audio-metadata.
+* Handle exceptions when loading audio metadata of downloaded songs.
 
 
 ## [4.5.0](https://github.com/thebigmunch/google-music-scripts/releases/tag/4.5.0) (2020-05-01)
